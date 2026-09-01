@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Remedial Healthcare Digital Order Book</title>
+<style>
+  :root{
+    --bg:#f4f5f9; --panel:#ffffff; --panel-2:#eef0f6; --border:#dde1ec;
+    --text:#161c2b; --text-muted:#6b7488; --accent:#0284c7; --accent-2:#7c5cff;
+    --green:#16a34a; --yellow:#b45309; --orange:#c2410c; --red:#dc2626; --gray:#6b7280;
+    color-scheme: light;
+  }
+  body.dark-theme{
+    --bg:#0f1220; --panel:#171b2e; --panel-2:#1e2338; --border:#2a2f4a;
+    --text:#e8eaf6; --text-muted:#9aa0c3; --accent:#0ea5e9; --accent-2:#7c5cff;
+    --green:#22c55e; --yellow:#eab308; --orange:#f97316; --red:#ef4444; --gray:#6b7280;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100vh;}
+  a{color:inherit;}
+  .theme-toggle-btn{background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    border-radius:9px;padding:8px 12px;font-size:12.5px;cursor:pointer;white-space:nowrap;}
+  .theme-toggle-btn:hover{border-color:var(--accent);}
+
+  /* ---------- Login screen ---------- */
+  #loginWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .login-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;
+    padding:28px 24px;max-width:340px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+  .login-card h1{font-size:18px;margin:0 0 4px;}
+  .login-card p{font-size:12.5px;color:var(--text-muted);margin:0 0 18px;}
+  .login-card input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:14px;margin-bottom:12px;}
+  .login-card button{width:100%;padding:12px;border:none;border-radius:10px;
+    background:linear-gradient(135deg,#0ea5e9,#7c5cff);color:#fff;font-weight:800;font-size:14px;
+    cursor:pointer;}
+  .login-msg{font-size:12.5px;color:var(--red);margin-top:10px;min-height:16px;}
+
+  /* ---------- Dashboard ---------- */
+  #dashWrap{display:none;max-width:1180px;margin:0 auto;padding:20px 16px 60px;}
+  .dash-header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-bottom:18px;flex-wrap:wrap;}
+  .dash-header h1{font-size:19px;margin:0;}
+  .dash-header .sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .logout-link{font-size:12.5px;color:var(--text-muted);text-decoration:underline;cursor:pointer;
+    background:none;border:none;padding:0;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+  .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+  .stat-card .num{font-size:22px;font-weight:800;}
+  .stat-card .label{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .toolbar input[type=text]{flex:1;min-width:180px;padding:9px 12px;border-radius:10px;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:13px;}
+  .toolbar select{padding:9px 10px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:13px;}
+  .toolbar input[type=date]{padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:12.5px;}
+  .order-items-toggle{background:none;border:none;color:var(--accent);font-size:11.5px;
+    cursor:pointer;padding:0;text-decoration:underline;}
+  .order-items-detail{display:none;margin-top:8px;font-size:12px;color:var(--text-muted);
+    border-top:1px dashed var(--border);padding-top:6px;}
+  .order-items-detail.show{display:block;}
+  .toolbar button{padding:9px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;}
+  .toolbar button:hover{border-color:var(--accent);}
+
+  .firm-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:14px 16px;margin-bottom:10px;}
+  .firm-card.inactive{opacity:.55;}
+  .firm-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .firm-name{font-size:15px;font-weight:800;}
+  .firm-meta{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+  .risk-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;
+    font-size:11px;font-weight:800;white-space:nowrap;}
+  .risk-fresh{background:rgba(34,197,94,.15);color:var(--green);}
+  .risk-watch{background:rgba(234,179,8,.15);color:var(--yellow);}
+  .risk-warning{background:rgba(249,115,22,.15);color:var(--orange);}
+  .risk-expired-risk{background:rgba(239,68,68,.15);color:var(--red);}
+  .risk-none, .risk-unknown{background:rgba(107,114,128,.15);color:var(--gray);}
+
+  .outcome-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    font-size:10.5px;font-weight:700;white-space:nowrap;background:rgba(124,92,255,.14);color:var(--accent-2);}
+
+  .order-status-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:999px;
+    font-size:11px;font-weight:800;white-space:nowrap;}
+  .order-status-pending{background:rgba(234,179,8,.15);color:var(--yellow);}
+  .order-status-fulfilled{background:rgba(34,197,94,.15);color:var(--green);}
+  .order-status-cancelled{background:rgba(239,68,68,.15);color:var(--red);}
+  .order-status-select{padding:6px 8px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:11.5px;font-weight:700;}
+  .order-dispatch-form{display:none;margin-top:8px;padding:8px 10px;border-radius:8px;
+    background:var(--panel-2);border:1px solid var(--border);}
+  .order-dispatch-form.open{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .order-dispatch-form input{padding:6px 8px;border-radius:7px;border:1px solid var(--border);
+    background:var(--panel);color:var(--text);font-size:11.5px;flex:1;min-width:120px;}
+  .order-history-panel{display:none;margin-top:8px;padding:8px 10px;border-radius:8px;
+    background:var(--panel-2);border:1px dashed var(--border);font-size:11.5px;}
+  .order-history-panel.open{display:block;}
+  .order-history-row{padding:3px 0;border-bottom:1px dashed var(--border);}
+  .order-history-row:last-child{border-bottom:none;}
+  .snoozed-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    font-size:10.5px;font-weight:700;white-space:nowrap;background:rgba(14,165,233,.14);color:var(--accent);}
+  .fu-field-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .fu-field-row .fu-note{flex:2;min-width:180px;}
+  .fu-field-row .fu-outcome{flex:1;min-width:140px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:12px;}
+  .fu-snooze-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+  .fu-snooze-row .fu-snooze-label{font-size:11px;color:var(--text-muted);margin-right:2px;}
+  .fu-snooze-row input[type=date]{padding:5px 7px;border-radius:7px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:11px;}
+
+  .div-chip{display:inline-block;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:8px;padding:3px 8px;font-size:11px;margin:4px 6px 0 0;color:var(--text);}
+  .firm-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .firm-actions button{padding:6px 12px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;}
+  .firm-actions button.danger{border-color:rgba(239,68,68,.4);color:var(--red);}
+  .firm-actions button.activate{border-color:rgba(34,197,94,.4);color:var(--green);}
+  .new-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    font-size:10.5px;font-weight:800;white-space:nowrap;background:rgba(244,114,182,.16);color:#f472b6;}
+  .reviewed-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    font-size:10.5px;font-weight:700;white-space:nowrap;background:rgba(34,197,94,.14);color:var(--green);}
+  .empty-msg{text-align:center;color:var(--text-muted);font-size:13px;padding:40px 0;}
+
+  /* ---------- Tabs ---------- */
+  .tab-row{display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid var(--border);}
+  .tab-btn{background:none;border:none;color:var(--text-muted);font-size:13px;font-weight:700;
+    padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent;margin-right:14px;}
+  .tab-btn.active{color:var(--text);border-bottom-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ---------- Product / scheme rows ---------- */
+  .row-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:12px 14px;margin-bottom:8px;}
+  .row-card.inactive{opacity:.5;}
+  .row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .row-title{font-size:14px;font-weight:800;}
+  .row-meta{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+  .row-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .row-actions button{padding:6px 12px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:11.5px;font-weight:700;cursor:pointer;}
+  .row-actions button.danger{border-color:rgba(239,68,68,.4);color:var(--red);}
+  .row-actions button.activate{border-color:rgba(34,197,94,.4);color:var(--green);}
+
+  /* ---------- Inline add/edit form panel ---------- */
+  .form-panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:16px;margin-bottom:16px;}
+  .form-panel.open{display:block;}
+  .form-panel h3{margin:0 0 12px;font-size:14px;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:10px;}
+  .form-grid label{font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;}
+  .form-grid input, .form-grid select, .form-grid textarea{width:100%;padding:8px 10px;border-radius:8px;
+    border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:12.5px;}
+  .form-grid textarea{resize:vertical;min-height:38px;}
+  .tier-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+  .tier-row input{width:70px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:12.5px;}
+  .form-actions{display:flex;gap:8px;margin-top:10px;}
+  .form-actions button{padding:9px 16px;border-radius:9px;border:none;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .form-actions .save-btn{background:linear-gradient(135deg,#0ea5e9,#7c5cff);color:#fff;}
+  .form-actions .cancel-btn{background:var(--panel-2);color:var(--text-muted);border:1px solid var(--border);}
+  .small-btn{padding:5px 10px;border-radius:7px;border:1px solid var(--border);background:var(--panel-2);
+    color:var(--text);font-size:11px;cursor:pointer;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div id="loginWrap">
+  <div class="login-card">
+    <h1>🛠️ Admin Panel</h1>
+    <p>Remedial Healthcare Digital Order Book — internal use only.</p>
+    <input type="text" id="adminNameInput" placeholder="Your name (so actions are tagged as yours)" autocomplete="off">
+    <input type="password" id="adminPwInput" placeholder="Admin password" autocomplete="off">
+    <button type="button" id="adminLoginBtn">Log In</button>
+    <div class="login-msg" id="adminLoginMsg"></div>
+  </div>
+</div>
+
+<div id="dashWrap">
+  <div class="dash-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <div class="sub">Firms, DL numbers, territory claims, and activity risk</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button type="button" class="theme-toggle-btn" id="adminThemeToggle">🌙 Dark mode</button>
+      <button type="button" class="logout-link" id="adminLogoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="tab-row">
+    <button type="button" class="tab-btn active" data-tab="clients">Clients</button>
+    <button type="button" class="tab-btn" data-tab="newreg">🆕 New Registrations <span id="newRegCountBadge"></span></button>
+    <button type="button" class="tab-btn" data-tab="orders">📦 Orders</button>
+    <button type="button" class="tab-btn" data-tab="followups">📞 Follow-ups <span id="followupCountBadge"></span></button>
+    <button type="button" class="tab-btn" data-tab="products">Products</button>
+    <button type="button" class="tab-btn" data-tab="schemes">Schemes</button>
+    <button type="button" class="tab-btn" data-tab="activity">📋 Activity</button>
+  </div>
+
+  <!-- ================= Clients tab ================= -->
+  <div class="tab-panel active" id="tab-clients">
+    <div class="stat-row" id="statRow"></div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Search firm name, DL number, state, district...">
+      <select id="riskFilter">
+        <option value="">All risk levels</option>
+        <option value="expired-risk">🔴 Expired risk (90d+)</option>
+        <option value="warning">🟠 Warning (60-89d)</option>
+        <option value="watch">🟡 Watch (30-59d)</option>
+        <option value="fresh">🟢 Fresh (&lt;30d)</option>
+        <option value="none">⚪ No active divisions</option>
+      </select>
+      <select id="statusFilter">
+        <option value="">All statuses</option>
+        <option value="active">Active only</option>
+        <option value="inactive">Inactive only</option>
+      </select>
+      <button type="button" id="exportCsvBtn">⬇ Export Excel</button>
+      <button type="button" id="refreshBtn">🔄 Refresh</button>
+      <button type="button" id="addClientBtn">➕ Add Client Manually</button>
+    </div>
+
+    <!-- Manual onboarding: for clients Sunil has already signed up offline (visited the shop,
+         verified the DL number in person, etc.). Creates the firm account AND grants the
+         territory in one step -- reuses the exact same clash/DL/duplicate checks as the public
+         "Apply for Franchise" flow, so nothing here can bypass those safety rules. -->
+    <div class="form-panel" id="clientForm">
+      <h3>Add Client Manually</h3>
+      <div class="form-grid">
+        <div><label>Firm / Shop Name *</label><input type="text" id="cf-firmName" placeholder="e.g. Sharma Medicos"></div>
+        <div><label>PIN (4-6 digits) *</label><input type="text" inputmode="numeric" maxlength="6" id="cf-pin" placeholder="e.g. 1234"></div>
+        <div><label>Contact Phone</label><input type="text" id="cf-phone" placeholder="10-digit mobile"></div>
+        <div><label>Contact Email</label><input type="text" id="cf-email" placeholder="optional"></div>
+        <div><label>DL Number *</label><input type="text" id="cf-dl" placeholder="e.g. 20B/PB-AS3-102618"></div>
+        <div><label>State *</label><select id="cf-state"><option value="">Loading...</option></select></div>
+        <div><label>District *</label><select id="cf-district"><option value="">Select state first</option></select></div>
+      </div>
+
+      <label style="font-size:11px;color:var(--text-muted);display:block;margin:10px 0 6px;">Divisions to grant *</label>
+      <div id="cf-divisions"></div>
+
+      <div id="cf-msg" style="font-size:12.5px;margin-top:10px;"></div>
+      <div class="form-actions">
+        <button type="button" class="save-btn" id="clientSaveBtn">Create Client</button>
+        <button type="button" class="cancel-btn" id="clientCancelBtn">Cancel</button>
+      </div>
+    </div>
+
+    <div id="firmsList"></div>
+  </div>
+
+  <!-- ================= New Registrations tab ================= -->
+  <div class="tab-panel" id="tab-newreg">
+    <div class="toolbar">
+      <span style="font-size:12px;color:var(--text-muted);flex:1;min-width:220px;">Firms that registered through the app itself (phone or email on file), newest first -- older bulk-imported records without contact info are excluded automatically. Review each one, and deactivate anything that looks like a fake or duplicate signup before it can claim territory.</span>
+      <select id="newRegWindow">
+        <option value="7">Last 7 days</option>
+        <option value="14" selected>Last 14 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="0">All time</option>
+      </select>
+      <input type="text" id="newRegSearchInput" placeholder="Search firm name, DL number...">
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="newRegShowReviewed"> Show already-reviewed</label>
+      <button type="button" id="exportNewRegBtn">⬇ Export Excel</button>
+    </div>
+    <div id="newRegList"></div>
+  </div>
+
+  <!-- ================= Orders tab ================= -->
+  <div class="tab-panel" id="tab-orders">
+    <div class="stat-row" id="orderStatRow"></div>
+
+    <div class="toolbar">
+      <input type="text" id="orderSearchInput" placeholder="Search firm name...">
+      <select id="orderStatusFilter">
+        <option value="">All statuses</option>
+        <option value="pending">🟡 Pending</option>
+        <option value="fulfilled">🟢 Fulfilled</option>
+        <option value="cancelled">🔴 Cancelled</option>
+      </select>
+      <input type="date" id="orderFromDate" title="From date">
+      <input type="date" id="orderToDate" title="To date">
+      <button type="button" id="orderFilterBtn">Filter</button>
+      <button type="button" id="orderClearFilterBtn">Clear</button>
+      <button type="button" id="exportOrdersBtn">⬇ Export Excel</button>
+      <button type="button" id="refreshOrdersBtn">🔄 Refresh</button>
+    </div>
+
+    <!-- Bulk action bar -- appears once at least one order checkbox is ticked. Handy after a
+         delivery round covering several firms: tick them all, pick a status, apply once. -->
+    <div class="toolbar" id="orderBulkBar" style="display:none;background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;">
+      <span style="font-size:12.5px;font-weight:700;" id="orderBulkCount">0 selected</span>
+      <select id="orderBulkStatus">
+        <option value="pending">🟡 Set to Pending</option>
+        <option value="fulfilled">🟢 Set to Fulfilled</option>
+        <option value="cancelled">🔴 Set to Cancelled</option>
+      </select>
+      <button type="button" class="activate" id="orderBulkApplyBtn">Apply to selected</button>
+      <button type="button" id="orderBulkClearBtn">Clear selection</button>
+    </div>
+
+    <div style="margin-bottom:6px;">
+      <label style="font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+        <input type="checkbox" id="orderSelectAll"> Select all loaded orders
+      </label>
+    </div>
+
+    <div id="ordersList"></div>
+  </div>
+
+  <!-- ================= Follow-ups tab ================= -->
+  <div class="tab-panel" id="tab-followups">
+    <div class="stat-row" id="followupStatRow"></div>
+
+    <div class="toolbar">
+      <span style="font-size:12px;color:var(--text-muted);flex:1;min-width:220px;">Clients whose most recent activity has passed 30 days — reach out before the 90-day auto-release. Notes, outcomes, and snoozes are shared with anyone else using this admin panel.</span>
+      <select id="followupDivFilter">
+        <option value="">All divisions</option>
+        <option value="R">Remedial Healthcare</option>
+        <option value="C">Cutis</option>
+        <option value="S">She Biologicals</option>
+        <option value="O">Ortholink</option>
+        <option value="F">Femigenix</option>
+      </select>
+      <select id="followupOutcomeFilter">
+        <option value="">All outcomes</option>
+        <option value="none">No outcome set</option>
+        <option value="interested">👍 Interested</option>
+        <option value="call-back-later">⏰ Call back later</option>
+        <option value="no-answer">📵 No answer</option>
+        <option value="not-interested">👎 Not interested</option>
+        <option value="will-reorder">✅ Will reorder soon</option>
+      </select>
+      <select id="followupSort">
+        <option value="overdue">Sort: Most overdue first</option>
+        <option value="recent">Sort: Least overdue first</option>
+        <option value="name">Sort: Firm name (A-Z)</option>
+      </select>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="followupShowRecent"> Show recently contacted</label>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="followupShowSnoozed"> Show snoozed</label>
+      <button type="button" id="editWaTemplateBtn">✏️ Edit WhatsApp message</button>
+      <button type="button" id="exportFollowupsBtn">⬇ Export Excel</button>
+    </div>
+
+    <div class="toolbar" style="margin-top:-6px;">
+      <span style="font-size:11.5px;color:var(--text-muted);flex:1;">The 3 example leads below are fully interactive (mark contacted, add notes, set outcome, snooze) so you can practice the workflow -- they're saved only in this browser, never sent to the real client list.</span>
+      <label style="font-size:12px;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="followupShowSamples" checked> Show example leads</label>
+      <button type="button" class="small-btn" id="followupResetSamplesBtn">↺ Reset examples</button>
+    </div>
+
+    <div class="form-panel" id="waTemplateForm">
+      <h3>WhatsApp follow-up message</h3>
+      <p style="font-size:11.5px;color:var(--text-muted);margin:0 0 8px;">Use <code>{{firmName}}</code> anywhere you want the client's firm name inserted automatically.</p>
+      <textarea id="waTemplateInput" rows="4" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:13px;box-sizing:border-box;"></textarea>
+      <div class="form-actions">
+        <button type="button" class="save-btn" id="waTemplateSaveBtn">Save Template</button>
+        <button type="button" class="cancel-btn" id="waTemplateCancelBtn">Cancel</button>
+      </div>
+    </div>
+
+    <div id="followupsList"></div>
+  </div>
+
+  <!-- ================= Products tab ================= -->
+  <div class="tab-panel" id="tab-products">
+    <div class="toolbar">
+      <input type="text" id="productSearchInput" placeholder="Search SKU, name, composition...">
+      <select id="productDivFilter">
+        <option value="">All divisions</option>
+        <option value="General">Remedial Healthcare</option>
+        <option value="Skincare">Cutis</option>
+        <option value="Gynae">She Biologicals</option>
+        <option value="Ortho">Ortholink</option>
+        <option value="FemiGenix">Femigenix</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted);white-space:nowrap;">
+        <input type="checkbox" id="productSlowMoverFilter" style="width:auto;"> 🐌 Slow movers only
+      </label>
+      <span style="font-size:11px;color:var(--text-muted);" title="🔥 Fast: ordered in last 30d and in the top ~30% by volume (last 90d). 🐌 Slow: no order in 60d, or never ordered. 🟢 Normal: everything else.">ℹ️ Movement badges</span>
+      <button type="button" id="addProductBtn">➕ Add Product</button>
+      <button type="button" id="exportProductsBtn">⬇ Export Excel</button>
+    </div>
+
+    <div class="form-panel" id="productForm">
+      <h3 id="productFormTitle">Add Product</h3>
+      <input type="hidden" id="pf-id">
+      <div class="form-grid">
+        <div><label>SKU *</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="pf-sku" style="flex:1;">
+            <button type="button" id="pf-skuAutoBtn" class="small-btn" title="Suggest the next SKU for this division" style="white-space:nowrap;">🔁 Auto</button>
+          </div>
+        </div>
+        <div><label>Name *</label><input type="text" id="pf-name"></div>
+        <div><label>Division *</label>
+          <select id="pf-div">
+            <option value="General">Remedial Healthcare</option>
+            <option value="Skincare">Cutis</option>
+            <option value="Gynae">She Biologicals</option>
+            <option value="Ortho">Ortholink</option>
+            <option value="FemiGenix">Femigenix</option>
+          </select>
+        </div>
+        <div><label>Form (Tablets/Cream/etc.)</label><input type="text" id="pf-form" list="pf-formList"><datalist id="pf-formList"></datalist></div>
+        <div><label>Category</label>
+          <input type="text" id="pf-cat" list="pf-catList" placeholder="Pick an existing one or type a new category">
+          <datalist id="pf-catList"></datalist>
+        </div>
+        <div><label>Pack</label><input type="text" id="pf-pack"></div>
+        <div>
+          <label>Product photo</label>
+          <input type="file" id="pf-imgFile" accept="image/*">
+          <input type="text" id="pf-img" placeholder="rhc-assets/images/XXXX.jpg (or upload a photo above)" style="margin-top:6px;">
+          <div id="pf-imgPreviewWrap" style="display:none;margin-top:6px;">
+            <img id="pf-imgPreview" style="max-width:70px;max-height:70px;border-radius:8px;background:#fff;padding:3px;">
+          </div>
+          <div id="pf-imgUploadMsg" style="font-size:11px;margin-top:4px;"></div>
+        </div>
+        <div>
+          <label>Label PDF</label>
+          <input type="file" id="pf-pdfFile" accept="application/pdf">
+          <input type="text" id="pf-pdf" placeholder="rhc-assets/labels/XXXX.pdf (or upload a PDF above)" style="margin-top:6px;">
+          <div id="pf-pdfUploadMsg" style="font-size:11px;margin-top:4px;"></div>
+        </div>
+        <div><label>Flavours (comma-separated, optional)</label><input type="text" id="pf-flavours" placeholder="Chocolate, Vanilla"></div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-muted);">Composition (each active ingredient + strength, one per line or comma-separated)</label>
+        <textarea id="pf-comp" rows="4" placeholder="e.g. Paracetamol 500mg + Caffeine 30mg&#10;or: Each 5ml contains: Cetirizine HCl 5mg, Dextromethorphan 10mg" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:13px;resize:vertical;min-height:90px;line-height:1.5;box-sizing:border-box;"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="save-btn" id="productSaveBtn">Save Product</button>
+        <button type="button" class="cancel-btn" id="productCancelBtn">Cancel</button>
+      </div>
+    </div>
+
+    <div id="productsList"></div>
+  </div>
+
+  <!-- ================= Schemes tab ================= -->
+  <div class="tab-panel" id="tab-schemes">
+    <div class="toolbar">
+      <button type="button" id="addSchemeBtn">➕ Add Scheme</button>
+      <button type="button" id="exportSchemesBtn">⬇ Export Excel</button>
+    </div>
+
+    <div class="form-panel" id="schemeForm">
+      <h3 id="schemeFormTitle">Add Scheme</h3>
+      <input type="hidden" id="sf-id">
+      <div class="form-grid">
+        <div><label>Division *</label>
+          <select id="sf-div">
+            <option value="General">Remedial Healthcare</option>
+            <option value="Skincare">Cutis</option>
+            <option value="Gynae">She Biologicals</option>
+            <option value="Ortho">Ortholink</option>
+            <option value="FemiGenix">Femigenix</option>
+          </select>
+        </div>
+        <div><label>Product SKU *</label><input type="text" id="sf-sku" placeholder="e.g. O031"></div>
+        <div><label>Scheme title *</label><input type="text" id="sf-title" placeholder="e.g. Buy More, Save More"></div>
+      </div>
+      <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:6px;">Tiers (buy X, get Y free)</label>
+      <div id="sf-tiers"></div>
+      <button type="button" class="small-btn" id="sf-addTier">+ Add tier</button>
+      <div class="form-actions">
+        <button type="button" class="save-btn" id="schemeSaveBtn">Save Scheme</button>
+        <button type="button" class="cancel-btn" id="schemeCancelBtn">Cancel</button>
+      </div>
+    </div>
+
+    <div id="schemesList"></div>
+  </div>
+
+  <!-- ================= Activity tab ================= -->
+  <div class="tab-panel" id="tab-activity">
+    <div class="toolbar">
+      <span style="font-size:12px;color:var(--text-muted);flex:1;">Who did what, tagged by the name entered at login. Read-only lookups (viewing lists) aren't logged, only changes.</span>
+      <button type="button" id="refreshActivityBtn">🔄 Refresh</button>
+    </div>
+    <div id="activityList"></div>
+  </div>
+</div>
+
+<script>
+const ADMIN_SESSION_KEY = 'remedial_admin_pw';
+const ADMIN_NAME_KEY = 'remedial_admin_operator';
+let allFirms = [];
+
+function sessionGetAdminPw(){
+  try{ return sessionStorage.getItem(ADMIN_SESSION_KEY); }catch(e){ return null; }
+}
+function sessionSetAdminPw(pw){
+  try{ sessionStorage.setItem(ADMIN_SESSION_KEY, pw); }catch(e){}
+}
+function sessionClearAdminPw(){
+  try{ sessionStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
+}
+function sessionGetOperator(){
+  try{ return sessionStorage.getItem(ADMIN_NAME_KEY) || ''; }catch(e){ return ''; }
+}
+function sessionSetOperator(name){
+  try{ sessionStorage.setItem(ADMIN_NAME_KEY, name); }catch(e){}
+}
+
+async function adminApi(action, extra){
+  const pw = sessionGetAdminPw();
+  const res = await fetch('/api/admin', {
+    method: 'POST', headers: {'content-type':'application/json'},
+    body: JSON.stringify(Object.assign({ action, password: pw, operator: sessionGetOperator() }, extra || {}))
+  });
+  const data = await res.json();
+  if(res.status === 401){
+    sessionClearAdminPw();
+    showLogin('Session expired — please log in again.');
+    throw new Error('unauthorized');
+  }
+  return data;
+}
+
+function showLogin(msg){
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('dashWrap').style.display = 'none';
+  document.getElementById('adminLoginMsg').textContent = msg || '';
+}
+function showDashboard(){
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('dashWrap').style.display = 'block';
+  loadAll();
+}
+
+// Admin panel now defaults to a light theme (previously it was dark-only) -- staff can still
+// flip to dark and it's remembered per-browser via localStorage, same pattern as the main
+// ordering app's theme toggle.
+const ADMIN_THEME_KEY = 'remedial_admin_theme';
+function applyAdminTheme(theme){
+  const btn = document.getElementById('adminThemeToggle');
+  if(theme === 'dark'){
+    document.body.classList.add('dark-theme');
+    if(btn) btn.textContent = '☀️ Light mode';
+  }else{
+    document.body.classList.remove('dark-theme');
+    if(btn) btn.textContent = '🌙 Dark mode';
+  }
+}
+(function initAdminTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem(ADMIN_THEME_KEY); }catch(e){}
+  applyAdminTheme(saved === 'dark' ? 'dark' : 'light');
+})();
+document.getElementById('adminThemeToggle').addEventListener('click', () => {
+  const next = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+  applyAdminTheme(next);
+  try{ localStorage.setItem(ADMIN_THEME_KEY, next); }catch(e){}
+});
+
+document.getElementById('adminLoginBtn').addEventListener('click', doLogin);
+document.getElementById('adminPwInput').addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
+document.getElementById('adminNameInput').addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
+document.getElementById('adminNameInput').value = sessionGetOperator();
+
+async function doLogin(){
+  const name = document.getElementById('adminNameInput').value.trim();
+  const pw = document.getElementById('adminPwInput').value;
+  if(!name){ document.getElementById('adminLoginMsg').textContent = 'Enter your name so actions can be tagged as yours.'; return; }
+  if(!pw){ document.getElementById('adminLoginMsg').textContent = 'Enter the admin password.'; return; }
+  sessionSetOperator(name);
+  sessionSetAdminPw(pw);
+  try{
+    const res = await fetch('/api/admin', {
+      method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({ action:'login', password: pw })
+    });
+    const data = await res.json();
+    if(data.ok){
+      showDashboard();
+    }else{
+      sessionClearAdminPw();
+      document.getElementById('adminLoginMsg').textContent = data.error || 'Incorrect password.';
+    }
+  }catch(e){
+    document.getElementById('adminLoginMsg').textContent = 'Network error. Please try again.';
+  }
+}
+
+document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+  sessionClearAdminPw();
+  showLogin('');
+  document.getElementById('adminPwInput').value = '';
+});
+
+async function loadAll(){
+  try{
+    const [overview, firmsRes] = await Promise.all([adminApi('overview'), adminApi('firms'), loadSettings()]);
+    if(overview.ok) renderStats(overview.totals);
+    if(firmsRes.ok){ allFirms = firmsRes.firms; renderFirms(); renderFollowups(); renderNewRegBadge(); }
+  }catch(e){ /* handled in adminApi (unauthorized) or ignored (network) */ }
+}
+
+function renderStats(t){
+  const cards = [
+    { num: t.totalFirms, label: 'Total firms' },
+    { num: t.activeFirms, label: 'Active firms' },
+    { num: t.inactiveFirms, label: 'Inactive firms' },
+    { num: t.firmsWithDl, label: 'With DL number' },
+    { num: t.activeClaims, label: 'Active territory claims' },
+  ];
+  document.getElementById('statRow').innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="num">${c.num}</div><div class="label">${c.label}</div></div>`
+  ).join('');
+}
+
+const RISK_ORDER = { 'expired-risk':0, 'warning':1, 'watch':2, 'fresh':3, 'unknown':4, 'none':5 };
+const RISK_LABEL = {
+  'expired-risk': '🔴 Expired risk',
+  'warning': '🟠 Warning (60-89d)',
+  'watch': '🟡 Watch (30-59d)',
+  'fresh': '🟢 Fresh (<30d)',
+  'unknown': '⚪ Unknown',
+  'none': '⚪ No active divisions',
+};
+
+function escapeHtml(s){
+  return (s == null ? '' : String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderFirms(){
+  const q = document.getElementById('searchInput').value.trim().toUpperCase();
+  const riskF = document.getElementById('riskFilter').value;
+  const statusF = document.getElementById('statusFilter').value;
+
+  let rows = allFirms.filter(f => {
+    if(riskF && f.risk !== riskF) return false;
+    if(statusF === 'active' && !f.active) return false;
+    if(statusF === 'inactive' && f.active) return false;
+    if(q){
+      const hay = [f.firmName, f.dlNumber, f.contactPhone, ...f.divisions.map(d => d.state+' '+d.district+' '+(d.workingArea||''))]
+        .join(' ').toUpperCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Riskiest / most-about-to-be-lost clients bubble to the top by default -- this is the
+  // whole point of the risk column: catch them before the 90-day auto-expiry actually fires.
+  rows.sort((a,b) => {
+    const r = (RISK_ORDER[a.risk] ?? 9) - (RISK_ORDER[b.risk] ?? 9);
+    if(r !== 0) return r;
+    return (b.daysSinceActivity ?? -1) - (a.daysSinceActivity ?? -1);
+  });
+
+  const list = document.getElementById('firmsList');
+  if(rows.length === 0){
+    list.innerHTML = '<div class="empty-msg">No firms match this filter.</div>';
+    return;
+  }
+
+  list.innerHTML = rows.map(f => {
+    const divChips = f.divisions.length
+      ? f.divisions.map(d => `<span class="div-chip">${escapeHtml(d.division)} — ${escapeHtml(d.district)}, ${escapeHtml(d.state)}${d.workingArea ? ' ('+escapeHtml(d.workingArea)+')' : ''}</span>`).join('')
+      : '<span class="div-chip">No active divisions</span>';
+    const daysTxt = f.daysSinceActivity == null ? 'no activity on record' : `${f.daysSinceActivity} day(s) since last activity`;
+    return `<div class="firm-card ${f.active ? '' : 'inactive'}">
+      <div class="firm-top">
+        <div>
+          <div class="firm-name">${escapeHtml(f.firmName)} ${f.active ? '' : '<span style="font-size:11px;color:var(--text-muted);">(inactive)</span>'}</div>
+          <div class="firm-meta">DL: ${escapeHtml(f.dlNumber || '—')} · ${escapeHtml(f.contactPhone || 'no phone')} · Registered ${f.registeredAt ? new Date(f.registeredAt).toLocaleDateString() : '—'} · ${daysTxt}</div>
+        </div>
+        <span class="risk-badge risk-${f.risk}">${RISK_LABEL[f.risk] || f.risk}</span>
+      </div>
+      <div>${divChips}</div>
+      <div class="firm-actions">
+        ${f.active
+          ? `<button type="button" class="danger" data-act="deactivate" data-id="${f.id}">Deactivate</button>`
+          : `<button type="button" class="activate" data-act="activate" data-id="${f.id}">Activate</button>`}
+        <button type="button" class="danger" data-act="delete" data-id="${f.id}" data-name="${escapeAttr(f.firmName)}">Delete firm</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+
+document.getElementById('firmsList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.getAttribute('data-act');
+  const id = btn.getAttribute('data-id');
+
+  if(act === 'deactivate' || act === 'activate'){
+    await adminApi('toggleActive', { firmId: id, active: act === 'activate' });
+    loadAll();
+  }else if(act === 'delete'){
+    const name = btn.getAttribute('data-name');
+    if(!confirm(`Delete "${name}" permanently? This also releases all their territory claims so those areas become available again. This cannot be undone.`)) return;
+    await adminApi('deleteFirm', { firmId: id });
+    loadAll();
+  }
+});
+
+document.getElementById('searchInput').addEventListener('input', renderFirms);
+document.getElementById('riskFilter').addEventListener('change', renderFirms);
+document.getElementById('statusFilter').addEventListener('change', renderFirms);
+document.getElementById('refreshBtn').addEventListener('click', loadAll);
+
+// ---------- New Registrations ----------
+// A dedicated, chronological view over the same `allFirms` data the Clients tab already
+// loads -- no extra fetch needed. The point is to surface brand-new signups (including
+// anything suspicious -- duplicate-looking names, missing contact info, a DL number that
+// looks off) so they get a quick look before they've had a chance to claim much territory,
+// rather than being buried alphabetically or by risk level in the main Clients list.
+//
+// isRealSignup() excludes bulk-imported historical records: the real in-app registration
+// flow (applyFranchise) always requires a phone number OR an email address, so any firm
+// missing BOTH could only have gotten into the database via a direct import, not through
+// someone actually filling out the registration form. Without this filter, a legacy bulk
+// import would flood this tab and its badge with hundreds of "new registrations" that are
+// really just old migrated records sharing the same import timestamp.
+function isRealSignup(f){
+  return !!(f.contactPhone || f.contactEmail);
+}
+function newRegCandidates(){
+  const windowDays = Number(document.getElementById('newRegWindow').value);
+  const cutoff = windowDays > 0 ? Date.now() - windowDays * 86400000 : -Infinity;
+  return allFirms.filter(f => isRealSignup(f) && f.registeredAt && new Date(f.registeredAt).getTime() >= cutoff);
+}
+function renderNewRegBadge(){
+  // Badge count = still-unreviewed signups from the last 30 days -- a rough "needs your eyes"
+  // number, independent of whatever window the tab itself is currently filtered to.
+  const cutoff = Date.now() - 30 * 86400000;
+  const count = allFirms.filter(f => isRealSignup(f) && f.registeredAt && new Date(f.registeredAt).getTime() >= cutoff && !f.reviewedAt).length;
+  const badge = document.getElementById('newRegCountBadge');
+  badge.textContent = count > 0 ? count : '';
+}
+function renderNewRegistrations(){
+  const q = document.getElementById('newRegSearchInput').value.trim().toUpperCase();
+  const showReviewed = document.getElementById('newRegShowReviewed').checked;
+
+  let rows = newRegCandidates().filter(f => {
+    if(!showReviewed && f.reviewedAt) return false;
+    if(q){
+      const hay = [f.firmName, f.dlNumber, f.contactPhone, f.contactEmail].join(' ').toUpperCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  rows.sort((a,b) => new Date(b.registeredAt) - new Date(a.registeredAt));
+
+  const list = document.getElementById('newRegList');
+  if(rows.length === 0){
+    list.innerHTML = '<div class="empty-msg">No new registrations in this window.</div>';
+    return;
+  }
+  const nowMs = Date.now();
+  list.innerHTML = rows.map(f => {
+    const divChips = f.divisions.length
+      ? f.divisions.map(d => `<span class="div-chip">${escapeHtml(d.division)} — ${escapeHtml(d.district)}, ${escapeHtml(d.state)}${d.workingArea ? ' ('+escapeHtml(d.workingArea)+')' : ''}</span>`).join('')
+      : '<span class="div-chip">No division claimed yet</span>';
+    const regDate = new Date(f.registeredAt);
+    const hoursAgo = (nowMs - regDate.getTime()) / 3600000;
+    const isBrandNew = hoursAgo <= 48;
+    const badges = `${isBrandNew ? '<span class="new-badge">🆕 NEW</span>' : ''}${f.reviewedAt ? '<span class="reviewed-badge">✅ Reviewed</span>' : ''}${f.active ? '' : '<span class="risk-badge risk-expired-risk">🚫 Deactivated</span>'}`;
+    const contactBits = [];
+    if(f.contactPhone) contactBits.push(`<a href="tel:${escapeAttr(f.contactPhone)}" style="color:var(--accent);">📞 ${escapeHtml(f.contactPhone)}</a>`);
+    if(f.contactEmail) contactBits.push(escapeHtml(f.contactEmail));
+    return `<div class="firm-card ${f.active ? '' : 'inactive'}">
+      <div class="firm-top">
+        <div>
+          <div class="firm-name">${escapeHtml(f.firmName)} ${badges}</div>
+          <div class="firm-meta">DL: ${escapeHtml(f.dlNumber || '— missing')} · ${contactBits.length ? contactBits.join(' · ') : 'no contact info'} · Registered ${regDate.toLocaleString()}</div>
+        </div>
+      </div>
+      <div>${divChips}</div>
+      <div class="firm-actions">
+        ${f.reviewedAt
+          ? `<button type="button" data-act="unreview" data-id="${f.id}">↺ Mark unreviewed</button>`
+          : `<button type="button" class="activate" data-act="review" data-id="${f.id}">✅ Mark reviewed</button>`}
+        ${f.active
+          ? `<button type="button" class="danger" data-act="deactivate" data-id="${f.id}">🚫 Deactivate (looks fake)</button>`
+          : `<button type="button" class="activate" data-act="activate" data-id="${f.id}">Reactivate</button>`}
+        <button type="button" class="danger" data-act="delete" data-id="${f.id}" data-name="${escapeAttr(f.firmName)}">Delete firm</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('newRegList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.getAttribute('data-act');
+  const id = btn.getAttribute('data-id');
+
+  if(act === 'review' || act === 'unreview'){
+    await adminApi('markFirmReviewed', { firmId: id, reviewed: act === 'review' });
+    await loadAll();
+    renderNewRegistrations();
+  }else if(act === 'deactivate' || act === 'activate'){
+    await adminApi('toggleActive', { firmId: id, active: act === 'activate' });
+    await loadAll();
+    renderNewRegistrations();
+  }else if(act === 'delete'){
+    const name = btn.getAttribute('data-name');
+    if(!confirm(`Delete "${name}" permanently? This also releases all their territory claims so those areas become available again. This cannot be undone.`)) return;
+    await adminApi('deleteFirm', { firmId: id });
+    await loadAll();
+    renderNewRegistrations();
+  }
+});
+
+document.getElementById('newRegWindow').addEventListener('change', renderNewRegistrations);
+document.getElementById('newRegSearchInput').addEventListener('input', renderNewRegistrations);
+document.getElementById('newRegShowReviewed').addEventListener('change', renderNewRegistrations);
+document.getElementById('exportNewRegBtn').addEventListener('click', () => {
+  const rows = newRegCandidates().map(f => ({
+    'Firm Name': f.firmName, 'DL Number': f.dlNumber || '', 'Phone': f.contactPhone || '', 'Email': f.contactEmail || '',
+    'Registered At': f.registeredAt ? new Date(f.registeredAt).toLocaleString() : '',
+    'Divisions': f.divisions.map(d => `${d.division} (${d.district}, ${d.state})`).join(' | '),
+    'Active': f.active ? 'Yes' : 'No', 'Reviewed': f.reviewedAt ? 'Yes' : 'No',
+  }));
+  exportExcel('remedial-new-registrations', 'New Registrations', rows);
+});
+
+// ---------- Excel export (used by every tab's export button) ----------
+// Real .xlsx via SheetJS (loaded from cdnjs in <head>) rather than plain CSV, so the file
+// opens straight into Excel/Sheets with proper columns -- no character-encoding or comma-
+// escaping surprises, and it works identically for every data list in the admin panel.
+function exportExcel(filenamePrefix, sheetName, rows){
+  if(!rows || rows.length === 0){ alert('Nothing to export yet.'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31));
+  XLSX.writeFile(wb, `${filenamePrefix}-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  const rows = allFirms.map(f => ({
+    'Firm Name': f.firmName,
+    'DL Number': f.dlNumber || '',
+    'Phone': f.contactPhone || '',
+    'Email': f.contactEmail || '',
+    'Active': f.active ? 'Yes' : 'No',
+    'Registered At': f.registeredAt || '',
+    'Days Since Activity': f.daysSinceActivity ?? '',
+    'Risk': RISK_LABEL[f.risk] || f.risk,
+    'Divisions': f.divisions.map(d => `${TERRITORY_DIV_LABEL[d.division] || d.division}:${d.district}/${d.state}${d.workingArea ? '('+d.workingArea+')' : ''}`).join(' | '),
+  }));
+  exportExcel('remedial-clients', 'Clients', rows);
+});
+
+// ---------- Manual client onboarding ----------
+// Public read-only territory endpoints (states/districts/areas) don't need the admin
+// password -- they're the same lookups the main ordering app uses for its own dropdowns.
+const CF_DIV_CODES = { R: 'Remedial Healthcare', C: 'Cutis', S: 'She Biologicals', O: 'Ortholink', F: 'Femigenix' };
+let cfKnownAreas = [];
+
+async function territoryGet(params){
+  const res = await fetch('/api/territory?' + params);
+  return res.json();
+}
+
+function cfRenderDivisionRows(){
+  const wrap = document.getElementById('cf-divisions');
+  wrap.innerHTML = Object.keys(CF_DIV_CODES).map(code => `
+    <div class="cf-div-row" data-div="${code}" style="border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:8px;">
+      <label style="display:flex;align-items:center;gap:6px;font-weight:600;">
+        <input type="checkbox" class="cf-div-check" data-div="${code}"> ${CF_DIV_CODES[code]}
+      </label>
+      <div class="cf-div-body" data-div="${code}" style="display:none;margin-top:8px;padding-left:22px;">
+        <label style="font-size:12px;"><input type="radio" name="cf-scope-${code}" value="whole" checked> Entire district</label>
+        <label style="font-size:12px;margin-left:14px;"><input type="radio" name="cf-scope-${code}" value="areas"> Specific area(s)</label>
+        <div class="cf-div-areas" data-div="${code}" style="display:none;margin-top:6px;max-height:140px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;"></div>
+      </div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.cf-div-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      wrap.querySelector(`.cf-div-body[data-div="${cb.dataset.div}"]`).style.display = cb.checked ? 'block' : 'none';
+    });
+  });
+  wrap.querySelectorAll('input[type=radio][name^="cf-scope-"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const code = r.name.replace('cf-scope-', '');
+      const areasBox = wrap.querySelector(`.cf-div-areas[data-div="${code}"]`);
+      areasBox.style.display = (r.value === 'areas' && r.checked) ? 'block' : 'none';
+    });
+  });
+}
+
+function cfRenderAreaCheckboxes(){
+  document.querySelectorAll('.cf-div-areas').forEach(box => {
+    box.innerHTML = cfKnownAreas.length
+      ? cfKnownAreas.map(a => `<label style="display:block;font-size:12px;padding:2px 0;"><input type="checkbox" value="${escapeAttr(a)}"> ${escapeHtml(a)}</label>`).join('')
+      : '<span style="font-size:11.5px;color:var(--text-muted);">No specific areas on file for this district.</span>';
+  });
+}
+
+async function cfLoadStates(){
+  const sel = document.getElementById('cf-state');
+  sel.innerHTML = '<option value="">Loading...</option>';
+  const data = await territoryGet('action=states').catch(() => null);
+  if(data && Array.isArray(data.states)){
+    sel.innerHTML = '<option value="">Select state</option>' + data.states.map(s => `<option value="${escapeAttr(s)}">${escapeHtml(s)}</option>`).join('');
+  }else{
+    sel.innerHTML = '<option value="">Could not load states</option>';
+  }
+}
+
+async function cfLoadDistricts(state){
+  const sel = document.getElementById('cf-district');
+  if(!state){ sel.innerHTML = '<option value="">Select state first</option>'; return; }
+  sel.innerHTML = '<option value="">Loading...</option>';
+  const data = await territoryGet('action=districts&state=' + encodeURIComponent(state)).catch(() => null);
+  if(data && Array.isArray(data.districts)){
+    sel.innerHTML = '<option value="">Select district</option>' + data.districts.map(d => `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`).join('');
+  }else{
+    sel.innerHTML = '<option value="">Could not load districts</option>';
+  }
+}
+
+async function cfLoadAreas(state, district){
+  cfKnownAreas = [];
+  if(state && district){
+    const data = await territoryGet('action=areas&state=' + encodeURIComponent(state) + '&district=' + encodeURIComponent(district)).catch(() => null);
+    if(data && Array.isArray(data.areas)) cfKnownAreas = data.areas;
+  }
+  cfRenderAreaCheckboxes();
+}
+
+function cfSetMsg(msg, kind){
+  const el = document.getElementById('cf-msg');
+  el.textContent = msg || '';
+  el.style.color = kind === 'err' ? '#b91c1c' : (kind === 'ok' ? '#15803d' : 'var(--text-muted)');
+}
+
+function cfResetForm(){
+  document.getElementById('cf-firmName').value = '';
+  document.getElementById('cf-pin').value = '';
+  document.getElementById('cf-phone').value = '';
+  document.getElementById('cf-email').value = '';
+  document.getElementById('cf-dl').value = '';
+  cfSetMsg('', null);
+  cfRenderDivisionRows();
+  cfLoadStates();
+  document.getElementById('cf-district').innerHTML = '<option value="">Select state first</option>';
+}
+
+document.getElementById('addClientBtn').addEventListener('click', () => {
+  document.getElementById('clientForm').classList.add('open');
+  cfResetForm();
+});
+document.getElementById('clientCancelBtn').addEventListener('click', () => {
+  document.getElementById('clientForm').classList.remove('open');
+});
+document.getElementById('cf-state').addEventListener('change', (e) => {
+  cfLoadDistricts(e.target.value);
+  cfLoadAreas('', '');
+});
+document.getElementById('cf-district').addEventListener('change', (e) => {
+  const state = document.getElementById('cf-state').value;
+  cfLoadAreas(state, e.target.value);
+});
+
+document.getElementById('clientSaveBtn').addEventListener('click', async () => {
+  const firmName = document.getElementById('cf-firmName').value.trim();
+  const pin = document.getElementById('cf-pin').value.trim();
+  const contactPhone = document.getElementById('cf-phone').value.trim();
+  const contactEmail = document.getElementById('cf-email').value.trim();
+  const dlNumber = document.getElementById('cf-dl').value.trim();
+  const state = document.getElementById('cf-state').value;
+  const district = document.getElementById('cf-district').value;
+
+  if(!firmName){ cfSetMsg('Firm name is required.', 'err'); return; }
+  if(!/^[0-9]{4,6}$/.test(pin)){ cfSetMsg('PIN must be 4-6 digits.', 'err'); return; }
+  if(!state || !district){ cfSetMsg('Pick both state and district.', 'err'); return; }
+  if(!dlNumber){ cfSetMsg('DL number is required -- same rule as the public signup form.', 'err'); return; }
+
+  const divisions = [];
+  document.querySelectorAll('.cf-div-check:checked').forEach(cb => {
+    const code = cb.dataset.div;
+    const scopeSel = document.querySelector(`input[name="cf-scope-${code}"]:checked`);
+    const scope = scopeSel ? scopeSel.value : 'whole';
+    let areas = [];
+    if(scope === 'areas'){
+      areas = Array.from(document.querySelectorAll(`.cf-div-areas[data-div="${code}"] input[type=checkbox]:checked`)).map(c => c.value);
+    }
+    divisions.push({ code, scope, areas });
+  });
+  if(divisions.length === 0){ cfSetMsg('Select at least one division to grant.', 'err'); return; }
+
+  cfSetMsg('Creating client...', null);
+  try{
+    const data = await adminApi('createClient', {
+      firmName, pin, contactPhone: contactPhone || null, contactEmail: contactEmail || null, dlNumber,
+      state, district, divisions,
+    });
+    if(data.success){
+      const grantedTxt = (data.granted || []).map(g => `${CF_DIV_CODES[g.division] || g.division}${g.area ? ' ('+g.area+')' : ' (entire district)'}`).join(', ');
+      const rejectedTxt = (data.rejected || []).length
+        ? ' Not granted: ' + data.rejected.map(r => `${CF_DIV_CODES[r.division] || r.division}${r.area ? ' ('+r.area+')' : ''} — ${r.reason}`).join('; ')
+        : '';
+      cfSetMsg(`✅ Client created. Granted: ${grantedTxt || 'none'}.${rejectedTxt}`, 'ok');
+      loadAll();
+      setTimeout(() => { document.getElementById('clientForm').classList.remove('open'); }, 2200);
+    }else{
+      const rejectedTxt = (data.rejected || []).map(r => `${CF_DIV_CODES[r.division] || r.division}${r.area ? ' ('+r.area+')' : ''} — ${r.reason}`).join('; ');
+      cfSetMsg(data.error || rejectedTxt || 'Could not create client — no divisions were available to grant.', 'err');
+    }
+  }catch(e){
+    if(e.message !== 'unauthorized') cfSetMsg('Network error — please try again.', 'err');
+  }
+});
+
+// ---------- Activity log ----------
+const ACTIVITY_ACTION_LABEL = {
+  toggleActive: 'Activated/deactivated a firm', deleteFirm: 'Deleted a firm', createClient: 'Added a client manually',
+  markFirmReviewed: 'Reviewed a new registration',
+  markContacted: 'Logged a follow-up contact', snoozeFollowup: 'Snoozed a follow-up', setSetting: 'Updated a setting',
+  updateOrderStatus: 'Updated an order status', bulkUpdateOrderStatus: 'Bulk-updated order statuses',
+  addProduct: 'Added a product', updateProduct: 'Edited a product', toggleProductActive: 'Showed/hid a product',
+  deleteProduct: 'Deleted a product', uploadAsset: 'Uploaded a file',
+  addScheme: 'Added a scheme', updateScheme: 'Edited a scheme', toggleSchemeActive: 'Showed/hid a scheme', deleteScheme: 'Deleted a scheme',
+};
+
+async function loadActivity(){
+  const res = await adminApi('listActivity').catch(() => null);
+  const list = document.getElementById('activityList');
+  if(!res || !res.ok){ list.innerHTML = '<div class="empty-msg">Could not load activity.</div>'; return; }
+  if(res.activity.length === 0){ list.innerHTML = '<div class="empty-msg">No activity logged yet.</div>'; return; }
+  list.innerHTML = res.activity.map(a => `<div class="row-card">
+    <div class="row-top">
+      <div>
+        <div class="row-title">${escapeHtml(ACTIVITY_ACTION_LABEL[a.action] || a.action)}</div>
+        <div class="row-meta">${escapeHtml(a.operator || 'Unknown')} · ${new Date(a.created_at).toLocaleString()}${a.target ? ' · ' + escapeHtml(a.target) : ''}</div>
+      </div>
+    </div>
+  </div>`).join('');
+}
+document.getElementById('refreshActivityBtn').addEventListener('click', loadActivity);
+
+// ---------- Orders ----------
+let allOrders = [];
+let orderSelectedIds = new Set();
+
+const ORDER_STATUS_LABEL = { pending: '🟡 Pending', fulfilled: '🟢 Fulfilled', cancelled: '🔴 Cancelled' };
+
+async function loadOrders(filters){
+  const res = await adminApi('listOrders', filters || {}).catch(() => null);
+  if(res && res.ok){ allOrders = res.orders; orderSelectedIds.clear(); renderOrders(); }
+}
+
+function renderOrderStats(){
+  const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay()); startOfWeek.setHours(0,0,0,0);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  let weekCount = 0, weekQty = 0, monthCount = 0, monthQty = 0;
+  let pendingCount = 0, fulfilledCount = 0, cancelledCount = 0;
+  const productTotals = {};
+  const firmTotals = {};
+
+  allOrders.forEach(o => {
+    const d = new Date(o.createdAt);
+    if(d >= startOfMonth){ monthCount++; monthQty += o.totalQty || 0; }
+    if(d >= startOfWeek){ weekCount++; weekQty += o.totalQty || 0; }
+    if(o.status === 'fulfilled') fulfilledCount++;
+    else if(o.status === 'cancelled') cancelledCount++;
+    else pendingCount++;
+    (o.items || []).forEach(it => {
+      const key = it.sku || it.name;
+      if(!productTotals[key]) productTotals[key] = { name: it.name, sku: it.sku, qty: 0 };
+      productTotals[key].qty += Number(it.qty) || 0;
+    });
+    if(!firmTotals[o.firmName]) firmTotals[o.firmName] = { orders: 0, qty: 0 };
+    firmTotals[o.firmName].orders++;
+    firmTotals[o.firmName].qty += o.totalQty || 0;
+  });
+
+  const topProducts = Object.values(productTotals).sort((a,b) => b.qty - a.qty).slice(0, 5);
+  const topFirms = Object.entries(firmTotals).sort((a,b) => b[1].qty - a[1].qty).slice(0, 5);
+
+  const cards = [
+    { num: allOrders.length, label: 'Orders loaded' },
+    { num: weekCount, label: 'Orders this week' },
+    { num: monthCount, label: 'Orders this month' },
+    { num: monthQty, label: 'Units this month' },
+    { num: pendingCount, label: '🟡 Pending' },
+    { num: fulfilledCount, label: '🟢 Fulfilled' },
+    { num: cancelledCount, label: '🔴 Cancelled' },
+  ];
+  document.getElementById('orderStatRow').innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="num">${c.num}</div><div class="label">${c.label}</div></div>`
+  ).join('') + `
+    <div class="stat-card" style="grid-column:span 2;">
+      <div class="label" style="margin-bottom:6px;font-weight:700;">🏆 Top products (by units)</div>
+      ${topProducts.length ? topProducts.map(p => `<div style="font-size:12px;padding:2px 0;">${escapeHtml(p.name || p.sku)} — ${p.qty} units</div>`).join('') : '<div style="font-size:12px;color:var(--text-muted);">No data yet</div>'}
+    </div>
+    <div class="stat-card" style="grid-column:span 2;">
+      <div class="label" style="margin-bottom:6px;font-weight:700;">🏆 Top firms (by units)</div>
+      ${topFirms.length ? topFirms.map(([name,t]) => `<div style="font-size:12px;padding:2px 0;">${escapeHtml(name)} — ${t.qty} units (${t.orders} orders)</div>`).join('') : '<div style="font-size:12px;color:var(--text-muted);">No data yet</div>'}
+    </div>`;
+}
+
+function renderOrderBulkBar(){
+  const bar = document.getElementById('orderBulkBar');
+  const count = orderSelectedIds.size;
+  document.getElementById('orderBulkCount').textContent = `${count} selected`;
+  bar.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function renderOrders(){
+  const q = document.getElementById('orderSearchInput').value.trim().toUpperCase();
+  const statusFilter = document.getElementById('orderStatusFilter').value;
+  const rows = allOrders.filter(o => (!q || o.firmName.toUpperCase().includes(q)) && (!statusFilter || o.status === statusFilter));
+  renderOrderStats();
+  renderOrderBulkBar();
+  const list = document.getElementById('ordersList');
+  if(rows.length === 0){ list.innerHTML = '<div class="empty-msg">No orders match this filter.</div>'; return; }
+  list.innerHTML = rows.map(o => {
+    const itemsHtml = (o.items || []).map(it => `<div>${it.qty} × ${escapeHtml(it.name || it.sku)}${it.scheme ? ' <span style="color:var(--green);">(scheme: '+escapeHtml(it.scheme)+')</span>' : ''}</div>`).join('');
+    const status = o.status || 'pending';
+    const statusUpdatedTxt = o.statusUpdatedAt
+      ? ` · Updated to ${ORDER_STATUS_LABEL[status] || status} on ${new Date(o.statusUpdatedAt).toLocaleDateString()}${o.statusUpdatedBy ? ' by ' + escapeHtml(o.statusUpdatedBy) : ''}`
+      : '';
+    const dispatchTxt = (o.dispatchCourier || o.dispatchTracking)
+      ? `<div class="row-meta">🚚 ${escapeHtml(o.dispatchCourier || '')}${o.dispatchCourier && o.dispatchTracking ? ' · ' : ''}${o.dispatchTracking ? 'Tracking: ' + escapeHtml(o.dispatchTracking) : ''}</div>`
+      : '';
+    return `<div class="row-card" data-id="${o.id}">
+      <div class="row-top">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <input type="checkbox" class="order-select-cb" data-id="${o.id}" style="margin-top:4px;" ${orderSelectedIds.has(String(o.id)) ? 'checked' : ''}>
+          <div>
+            <div class="row-title">${escapeHtml(o.firmName)}</div>
+            <div class="row-meta">${o.firmArea ? escapeHtml(o.firmArea)+' · ' : ''}${new Date(o.createdAt).toLocaleString()} · ${o.itemCount} item(s), ${o.totalQty} unit(s)${o.orderRef ? ' · Ref: '+escapeHtml(o.orderRef) : ''}${statusUpdatedTxt}</div>
+            ${dispatchTxt}
+          </div>
+        </div>
+        <span class="order-status-badge order-status-${status}">${ORDER_STATUS_LABEL[status] || status}</span>
+      </div>
+      <div class="firm-actions">
+        <select class="order-status-select" data-id="${o.id}">
+          <option value="pending" ${status==='pending'?'selected':''}>🟡 Pending</option>
+          <option value="fulfilled" ${status==='fulfilled'?'selected':''}>🟢 Fulfilled</option>
+          <option value="cancelled" ${status==='cancelled'?'selected':''}>🔴 Cancelled</option>
+        </select>
+        <button type="button" data-act="toggle-dispatch" data-id="${o.id}">🚚 Dispatch info</button>
+        <button type="button" data-act="toggle-history" data-id="${o.id}">📜 History</button>
+        <button type="button" class="order-items-toggle" data-act="toggle-items">Show items</button>
+      </div>
+      <div class="order-dispatch-form" id="dispatchForm-${o.id}">
+        <input type="text" class="order-dispatch-courier" data-id="${o.id}" placeholder="Courier / transport name" value="${escapeAttr(o.dispatchCourier || '')}">
+        <input type="text" class="order-dispatch-tracking" data-id="${o.id}" placeholder="Tracking / LR number" value="${escapeAttr(o.dispatchTracking || '')}">
+        <button type="button" class="small-btn" data-act="save-dispatch" data-id="${o.id}">Save</button>
+      </div>
+      <div class="order-history-panel" id="historyPanel-${o.id}"></div>
+      <div class="order-items-detail">${itemsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('orderSearchInput').addEventListener('input', renderOrders);
+document.getElementById('orderStatusFilter').addEventListener('change', renderOrders);
+
+document.getElementById('ordersList').addEventListener('click', async (e) => {
+  const itemsBtn = e.target.closest('.order-items-toggle');
+  if(itemsBtn){
+    const detail = itemsBtn.closest('.row-card').querySelector('.order-items-detail');
+    const showing = detail.classList.toggle('show');
+    itemsBtn.textContent = showing ? 'Hide items' : 'Show items';
+    return;
+  }
+
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.getAttribute('data-act');
+  const id = btn.getAttribute('data-id');
+
+  if(act === 'toggle-dispatch'){
+    document.getElementById(`dispatchForm-${id}`).classList.toggle('open');
+  }else if(act === 'save-dispatch'){
+    const card = btn.closest('.row-card');
+    const courier = card.querySelector('.order-dispatch-courier').value.trim();
+    const tracking = card.querySelector('.order-dispatch-tracking').value.trim();
+    const order = allOrders.find(o => String(o.id) === id);
+    await adminApi('updateOrderStatus', {
+      orderId: id, status: order ? (order.status || 'pending') : 'pending',
+      dispatchCourier: courier || null, dispatchTracking: tracking || null,
+    });
+    loadOrders(currentOrderFilters());
+  }else if(act === 'toggle-history'){
+    const panel = document.getElementById(`historyPanel-${id}`);
+    const opening = !panel.classList.contains('open');
+    panel.classList.toggle('open');
+    if(opening){
+      panel.innerHTML = '<div style="color:var(--text-muted);">Loading...</div>';
+      const res = await adminApi('getOrderStatusLog', { orderId: id }).catch(() => null);
+      if(res && res.ok && res.log.length){
+        panel.innerHTML = res.log.map(h => `<div class="order-history-row">${ORDER_STATUS_LABEL[h.old_status] || h.old_status || '—'} → ${ORDER_STATUS_LABEL[h.new_status] || h.new_status} · ${escapeHtml(h.operator || 'Unknown')} · ${new Date(h.created_at).toLocaleString()}${h.note && h.note !== 'bulk update' ? ' · ' + escapeHtml(h.note) : ''}</div>`).join('');
+      }else{
+        panel.innerHTML = '<div style="color:var(--text-muted);">No status changes logged yet.</div>';
+      }
+    }
+  }
+});
+
+document.getElementById('ordersList').addEventListener('change', async (e) => {
+  const cb = e.target.closest('.order-select-cb');
+  if(cb){
+    if(cb.checked) orderSelectedIds.add(cb.getAttribute('data-id'));
+    else orderSelectedIds.delete(cb.getAttribute('data-id'));
+    renderOrderBulkBar();
+    return;
+  }
+  const sel = e.target.closest('.order-status-select');
+  if(sel){
+    const id = sel.getAttribute('data-id');
+    await adminApi('updateOrderStatus', { orderId: id, status: sel.value });
+    loadOrders(currentOrderFilters());
+  }
+});
+
+document.getElementById('orderSelectAll').addEventListener('change', (e) => {
+  document.querySelectorAll('.order-select-cb').forEach(cb => {
+    cb.checked = e.target.checked;
+    if(e.target.checked) orderSelectedIds.add(cb.getAttribute('data-id'));
+    else orderSelectedIds.delete(cb.getAttribute('data-id'));
+  });
+  renderOrderBulkBar();
+});
+
+document.getElementById('orderBulkApplyBtn').addEventListener('click', async () => {
+  if(orderSelectedIds.size === 0) return;
+  const status = document.getElementById('orderBulkStatus').value;
+  await adminApi('bulkUpdateOrderStatus', { orderIds: Array.from(orderSelectedIds), status });
+  document.getElementById('orderSelectAll').checked = false;
+  loadOrders(currentOrderFilters());
+});
+document.getElementById('orderBulkClearBtn').addEventListener('click', () => {
+  orderSelectedIds.clear();
+  document.getElementById('orderSelectAll').checked = false;
+  renderOrders();
+});
+
+function currentOrderFilters(){
+  return {
+    fromDate: document.getElementById('orderFromDate').value || undefined,
+    toDate: document.getElementById('orderToDate').value ? document.getElementById('orderToDate').value + ' 23:59:59' : undefined,
+  };
+}
+
+document.getElementById('orderFilterBtn').addEventListener('click', () => {
+  loadOrders(currentOrderFilters());
+});
+document.getElementById('orderClearFilterBtn').addEventListener('click', () => {
+  document.getElementById('orderFromDate').value = '';
+  document.getElementById('orderToDate').value = '';
+  document.getElementById('orderSearchInput').value = '';
+  document.getElementById('orderStatusFilter').value = '';
+  loadOrders();
+});
+document.getElementById('refreshOrdersBtn').addEventListener('click', () => loadOrders(currentOrderFilters()));
+document.getElementById('exportOrdersBtn').addEventListener('click', () => {
+  const rows = allOrders.map(o => ({
+    'Firm Name': o.firmName, 'Area': o.firmArea || '', 'Date': new Date(o.createdAt).toLocaleString(),
+    'Order Ref': o.orderRef || '', 'Item Count': o.itemCount, 'Total Qty': o.totalQty,
+    'Status': ORDER_STATUS_LABEL[o.status] || o.status || 'pending',
+    'Status Updated': o.statusUpdatedAt ? new Date(o.statusUpdatedAt).toLocaleString() : '',
+    'Status Updated By': o.statusUpdatedBy || '',
+    'Dispatch Courier': o.dispatchCourier || '', 'Dispatch Tracking': o.dispatchTracking || '',
+    'Items': (o.items || []).map(it => `${it.qty}x ${it.name || it.sku}`).join(' | '),
+  }));
+  exportExcel('remedial-orders', 'Orders', rows);
+});
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'products' && allProducts.length === 0) loadProducts();
+    if(btn.dataset.tab === 'products' && allOrders.length === 0) loadOrders().then(renderProducts); // needed for slow-mover badges
+    if(btn.dataset.tab === 'schemes' && allSchemes.length === 0) loadSchemes();
+    if(btn.dataset.tab === 'followups') renderFollowups();
+    if(btn.dataset.tab === 'newreg') renderNewRegistrations();
+    if(btn.dataset.tab === 'orders' && allOrders.length === 0) loadOrders();
+    if(btn.dataset.tab === 'activity') loadActivity();
+  });
+});
+
+// ---------- Follow-ups ----------
+// A view over the same `allFirms` data the Clients tab already loads, plus real DB-backed
+// "last contacted" + notes + outcome + snooze date (see markContacted / snoozeFollowup admin
+// actions) -- shared across every employee using this admin panel, not stuck in one browser's
+// localStorage. A firm drops out of the active list for 7 days after being marked contacted
+// (long enough for a call to actually lead to an order), or until its snooze date, and
+// resurfaces automatically once that window passes.
+const FOLLOWUP_RECENT_DAYS = 7;
+let adminSettings = {};
+const WA_TEMPLATE_DEFAULT = "Hi {{firmName}}, this is Remedial Healthcare. We noticed it's been a while since your last order. We'd love to help you restock -- please let us know if you'd like to place an order or need any assistance. Thank you!";
+
+async function loadSettings(){
+  const res = await adminApi('getSettings').catch(() => null);
+  if(res && res.ok) adminSettings = res.settings || {};
+}
+function getWaTemplate(){
+  return adminSettings.whatsapp_template || WA_TEMPLATE_DEFAULT;
+}
+
+function fuRecentlyContacted(f){
+  if(!f.lastContactedAt) return false;
+  const days = (Date.now() - new Date(f.lastContactedAt).getTime()) / 86400000;
+  return days < FOLLOWUP_RECENT_DAYS;
+}
+function fuIsSnoozed(f){
+  if(!f.nextFollowupAt) return false;
+  return new Date(f.nextFollowupAt).getTime() > Date.now();
+}
+
+const FU_OUTCOME_LABEL = {
+  'interested': '👍 Interested',
+  'call-back-later': '⏰ Call back later',
+  'no-answer': '📵 No answer',
+  'not-interested': '👎 Not interested',
+  'will-reorder': '✅ Will reorder soon',
+};
+const FU_OUTCOME_OPTIONS = [
+  { v: '', l: 'No outcome set' },
+  { v: 'interested', l: '👍 Interested' },
+  { v: 'call-back-later', l: '⏰ Call back later' },
+  { v: 'no-answer', l: '📵 No answer' },
+  { v: 'not-interested', l: '👎 Not interested' },
+  { v: 'will-reorder', l: '✅ Will reorder soon' },
+];
+
+// Three realistic, fully-interactive sample leads (not one inert row) so a new admin can
+// actually practice the whole workflow -- mark contacted, log an outcome, snooze -- before
+// any real client has crossed 30 days. Stored only in this browser's localStorage (never
+// sent to the server), keyed by a string id so they can never collide with a real numeric
+// firm id from the database.
+const FOLLOWUP_SAMPLES_KEY = 'remedial_admin_followup_samples_v2';
+const FOLLOWUP_SAMPLES_DEFAULT = [
+  {
+    id: 'sample-1', firmName: 'Sharma Medicos (example)', contactPhone: '9876501234', contactEmail: '',
+    divisions: [{ division: 'C', district: 'Zirakpur' }],
+    daysSinceActivity: 35, risk: 'watch', active: true,
+    lastContactedAt: null, lastContactedBy: null, followupNotes: '', lastContactOutcome: null, nextFollowupAt: null,
+  },
+  {
+    id: 'sample-2', firmName: 'Aggarwal Pharma Distributors (example)', contactPhone: '9915512345', contactEmail: '',
+    divisions: [{ division: 'O', district: 'Panchkula' }, { division: 'S', district: 'Panchkula' }],
+    daysSinceActivity: 72, risk: 'warning', active: true,
+    lastContactedAt: new Date(Date.now() - 10 * 86400000).toISOString(), lastContactedBy: 'Rohit',
+    followupNotes: 'Said stock is still moving, will order again next week.', lastContactOutcome: 'call-back-later', nextFollowupAt: null,
+  },
+  {
+    id: 'sample-3', firmName: 'New Life Chemists (example)', contactPhone: '9814498765', contactEmail: '',
+    divisions: [{ division: 'R', district: 'Mohali' }],
+    daysSinceActivity: 93, risk: 'expired-risk', active: true,
+    lastContactedAt: null, lastContactedBy: null, followupNotes: '', lastContactOutcome: null, nextFollowupAt: null,
+  },
+];
+function fuIsSample(id){ return typeof id === 'string' && id.startsWith('sample-'); }
+function fuLoadSamples(){
+  try{
+    const raw = localStorage.getItem(FOLLOWUP_SAMPLES_KEY);
+    if(raw){ const parsed = JSON.parse(raw); if(Array.isArray(parsed) && parsed.length) return parsed; }
+  }catch(e){}
+  return FOLLOWUP_SAMPLES_DEFAULT.map(s => ({ ...s }));
+}
+function fuSaveSamples(){
+  try{ localStorage.setItem(FOLLOWUP_SAMPLES_KEY, JSON.stringify(fuSamples)); }catch(e){}
+}
+let fuSamples = fuLoadSamples();
+
+function fuSnoozeDate(daysFromNow){
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  return d.toISOString().slice(0, 10);
+}
+
+function fuRenderStats(activeRows){
+  const contactedThisWeek = allFirms.filter(f => f.lastContactedAt && (Date.now() - new Date(f.lastContactedAt).getTime()) / 86400000 < 7).length;
+  const snoozed = allFirms.filter(f => fuIsSnoozed(f)).length;
+  const cards = [
+    { num: activeRows.length, label: 'Due for follow-up now' },
+    { num: contactedThisWeek, label: 'Contacted this week' },
+    { num: snoozed, label: 'Snoozed / scheduled' },
+  ];
+  document.getElementById('followupStatRow').innerHTML = cards.map(c =>
+    `<div class="stat-card"><div class="num">${c.num}</div><div class="label">${c.label}</div></div>`
+  ).join('');
+}
+
+function renderFollowups(){
+  const showRecent = document.getElementById('followupShowRecent').checked;
+  const showSnoozed = document.getElementById('followupShowSnoozed').checked;
+  const showSamples = document.getElementById('followupShowSamples').checked;
+  const divFilter = document.getElementById('followupDivFilter').value;
+  const outcomeFilter = document.getElementById('followupOutcomeFilter').value;
+  const sortMode = document.getElementById('followupSort').value;
+
+  const real = allFirms.filter(f => f.active && ['watch','warning','expired-risk'].includes(f.risk));
+  const activeReal = real.filter(f => !fuRecentlyContacted(f) && !fuIsSnoozed(f));
+  fuRenderStats(activeReal);
+
+  const badge = document.getElementById('followupCountBadge');
+  badge.textContent = activeReal.length > 0 ? `(${activeReal.length})` : '';
+
+  let rows = [...real];
+  if(showSamples) rows = [...fuSamples, ...rows];
+
+  rows = rows.filter(f => {
+    if(!showRecent && fuRecentlyContacted(f)) return false;
+    if(!showSnoozed && fuIsSnoozed(f)) return false;
+    if(divFilter && !f.divisions.some(d => d.division === divFilter)) return false;
+    if(outcomeFilter){
+      if(outcomeFilter === 'none' && f.lastContactOutcome) return false;
+      if(outcomeFilter !== 'none' && f.lastContactOutcome !== outcomeFilter) return false;
+    }
+    return true;
+  });
+
+  if(sortMode === 'recent') rows.sort((a,b) => (a.daysSinceActivity ?? 0) - (b.daysSinceActivity ?? 0));
+  else if(sortMode === 'name') rows.sort((a,b) => a.firmName.localeCompare(b.firmName));
+  else rows.sort((a,b) => (b.daysSinceActivity ?? 0) - (a.daysSinceActivity ?? 0));
+
+  const list = document.getElementById('followupsList');
+  if(rows.length === 0){
+    list.innerHTML = '<div class="empty-msg">Nobody matches this filter right now. 🎉</div>';
+    return;
+  }
+  list.innerHTML = rows.map(f => {
+    const isExample = fuIsSample(f.id);
+    const recentlyContacted = fuRecentlyContacted(f);
+    const snoozed = fuIsSnoozed(f);
+    const divs = f.divisions.map(d => `${TERRITORY_DIV_LABEL[d.division] || d.division} (${d.district})`).join(', ');
+    const phoneLink = f.contactPhone ? `<a href="tel:${escapeAttr(f.contactPhone)}">📞 ${escapeHtml(f.contactPhone)}</a>` : '';
+    const emailLink = f.contactEmail ? `<a href="mailto:${escapeAttr(f.contactEmail)}">✉️ ${escapeHtml(f.contactEmail)}</a>` : '';
+    const waMsg = getWaTemplate().replace(/\{\{firmName\}\}/g, f.firmName);
+    const waLink = f.contactPhone
+      ? `<a href="https://wa.me/${encodeURIComponent(f.contactPhone.replace(/[^0-9]/g,''))}?text=${encodeURIComponent(waMsg)}" target="_blank" rel="noopener">💬 WhatsApp</a>`
+      : '<span style="color:var(--text-muted);">💬 no phone on file</span>';
+    const contactedTxt = f.lastContactedAt
+      ? `Last contacted ${new Date(f.lastContactedAt).toLocaleDateString()}${f.lastContactedBy ? ' by ' + escapeHtml(f.lastContactedBy) : ''}`
+      : 'Not contacted yet';
+    const snoozedTxt = snoozed ? `<span class="snoozed-badge">⏰ Snoozed to ${new Date(f.nextFollowupAt).toLocaleDateString()}</span>` : '';
+    const outcomeTxt = f.lastContactOutcome ? `<span class="outcome-badge">${FU_OUTCOME_LABEL[f.lastContactOutcome] || f.lastContactOutcome}</span>` : '';
+    const outcomeOptionsHtml = FU_OUTCOME_OPTIONS.map(o => `<option value="${o.v}" ${f.lastContactOutcome === o.v || (!f.lastContactOutcome && !o.v) ? 'selected' : ''}>${o.l}</option>`).join('');
+    return `<div class="row-card${(recentlyContacted || snoozed) ? ' inactive' : ''}" data-id="${f.id}">
+      <div class="row-top">
+        <div>
+          <div class="row-title">${escapeHtml(f.firmName)} ${isExample ? '<span style="font-size:11px;color:var(--accent);">(example — practice here, nothing real is affected)</span>' : ''} ${recentlyContacted ? '<span style="font-size:11px;color:var(--text-muted);">(recently contacted)</span>' : ''}</div>
+          <div class="row-meta">${divs || 'No active divisions'} · ${f.daysSinceActivity ?? '?'} days since last order · ${contactedTxt}</div>
+          <div class="row-meta" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;">${outcomeTxt}${snoozedTxt}</div>
+          <div class="row-meta" style="display:flex;gap:12px;margin-top:4px;">${phoneLink} ${waLink} ${emailLink}</div>
+        </div>
+        <span class="risk-badge risk-${f.risk}">${RISK_LABEL[f.risk] || f.risk}</span>
+      </div>
+      <div class="fu-field-row">
+        <textarea class="fu-note" data-id="${f.id}" placeholder="Notes from your last call/message..." rows="2" style="padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:12px;box-sizing:border-box;resize:vertical;">${escapeHtml(f.followupNotes || '')}</textarea>
+        <select class="fu-outcome" data-id="${f.id}">${outcomeOptionsHtml}</select>
+      </div>
+      <div class="firm-actions">
+        <button type="button" class="activate" data-act="fu-contact" data-id="${f.id}">✅ Save &amp; mark contacted</button>
+      </div>
+      <div class="fu-snooze-row">
+        <span class="fu-snooze-label">⏰ Snooze follow-up:</span>
+        <button type="button" class="small-btn" data-act="fu-snooze" data-id="${f.id}" data-days="1">Tomorrow</button>
+        <button type="button" class="small-btn" data-act="fu-snooze" data-id="${f.id}" data-days="3">3 days</button>
+        <button type="button" class="small-btn" data-act="fu-snooze" data-id="${f.id}" data-days="7">1 week</button>
+        <input type="date" class="fu-snooze-date" data-id="${f.id}" min="${fuSnoozeDate(1)}">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function fuApplyUpdate(id, patch){
+  if(fuIsSample(id)){
+    const s = fuSamples.find(x => x.id === id);
+    if(s) Object.assign(s, patch);
+    fuSaveSamples();
+    renderFollowups();
+    return;
+  }
+  const f = allFirms.find(x => String(x.id) === String(id));
+  if(f) Object.assign(f, patch);
+  if(patch.lastContactedAt !== undefined || patch.followupNotes !== undefined || patch.lastContactOutcome !== undefined){
+    await adminApi('markContacted', { firmId: id, note: patch.followupNotes, outcome: patch.lastContactOutcome || '' }).catch(() => {});
+  }else if(patch.nextFollowupAt !== undefined){
+    await adminApi('snoozeFollowup', { firmId: id, nextFollowupAt: patch.nextFollowupAt }).catch(() => {});
+  }
+  loadAll();
+}
+
+document.getElementById('followupsList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.getAttribute('data-act');
+  const id = btn.getAttribute('data-id');
+  const card = btn.closest('.row-card');
+  const noteVal = card ? card.querySelector('.fu-note').value : '';
+  const outcomeVal = card ? card.querySelector('.fu-outcome').value : '';
+
+  if(act === 'fu-contact'){
+    await fuApplyUpdate(id, { lastContactedAt: new Date().toISOString(), followupNotes: noteVal, lastContactOutcome: outcomeVal || null, nextFollowupAt: null });
+  }else if(act === 'fu-snooze'){
+    const days = parseInt(btn.getAttribute('data-days'), 10) || 1;
+    await fuApplyUpdate(id, { nextFollowupAt: fuSnoozeDate(days) });
+  }
+});
+
+document.getElementById('followupsList').addEventListener('change', async (e) => {
+  const dateInput = e.target.closest('.fu-snooze-date');
+  if(dateInput && dateInput.value){
+    await fuApplyUpdate(dateInput.getAttribute('data-id'), { nextFollowupAt: dateInput.value });
+  }
+});
+
+document.getElementById('followupResetSamplesBtn').addEventListener('click', () => {
+  if(!confirm('Reset the 3 example leads back to their starting state?')) return;
+  fuSamples = FOLLOWUP_SAMPLES_DEFAULT.map(s => ({ ...s }));
+  fuSaveSamples();
+  renderFollowups();
+});
+
+['followupShowRecent', 'followupShowSnoozed', 'followupShowSamples', 'followupDivFilter', 'followupOutcomeFilter', 'followupSort'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderFollowups);
+});
+
+document.getElementById('exportFollowupsBtn').addEventListener('click', () => {
+  const rows = allFirms
+    .filter(f => f.active && ['watch','warning','expired-risk'].includes(f.risk) && !fuRecentlyContacted(f) && !fuIsSnoozed(f))
+    .sort((a,b) => (b.daysSinceActivity ?? 0) - (a.daysSinceActivity ?? 0))
+    .map(f => ({
+      'Firm Name': f.firmName, 'Phone': f.contactPhone || '', 'Email': f.contactEmail || '',
+      'Days Since Last Order': f.daysSinceActivity ?? '', 'Risk': RISK_LABEL[f.risk] || f.risk,
+      'Last Contacted': f.lastContactedAt ? new Date(f.lastContactedAt).toLocaleDateString() : '',
+      'Outcome': FU_OUTCOME_LABEL[f.lastContactOutcome] || '',
+      'Notes': f.followupNotes || '',
+      'Divisions': f.divisions.map(d => `${TERRITORY_DIV_LABEL[d.division] || d.division} (${d.district})`).join(' | '),
+    }));
+  exportExcel('remedial-followups', 'Follow-ups', rows);
+});
+
+// ---------- WhatsApp template editor ----------
+document.getElementById('editWaTemplateBtn').addEventListener('click', () => {
+  document.getElementById('waTemplateInput').value = getWaTemplate();
+  document.getElementById('waTemplateForm').classList.add('open');
+});
+document.getElementById('waTemplateCancelBtn').addEventListener('click', () => {
+  document.getElementById('waTemplateForm').classList.remove('open');
+});
+document.getElementById('waTemplateSaveBtn').addEventListener('click', async () => {
+  const value = document.getElementById('waTemplateInput').value;
+  await adminApi('setSetting', { key: 'whatsapp_template', value });
+  adminSettings.whatsapp_template = value;
+  document.getElementById('waTemplateForm').classList.remove('open');
+  renderFollowups();
+});
+
+const DIV_LABEL = { General:'Remedial Healthcare', Skincare:'Cutis', Gynae:'She Biologicals', Ortho:'Ortholink', FemiGenix:'Femigenix' };
+// Firm/territory records use the R/C/S/O/F codes from _worker.js's DIVISIONS map -- a
+// different namespace from the product catalog's General/Skincare/Gynae/Ortho/FemiGenix keys
+// above (DIV_LABEL). Keep them separate rather than merging, since a couple of catalog keys
+// (e.g. "Ortho") could otherwise silently collide with territory codes.
+const TERRITORY_DIV_LABEL = { R:'Remedial Healthcare', C:'Cutis', S:'She Biologicals', O:'Ortholink', F:'Femigenix' };
+
+// ---------- Products ----------
+let allProducts = [];
+
+async function loadProducts(){
+  const res = await adminApi('listProducts').catch(() => null);
+  if(res && res.ok){ allProducts = res.products; renderProducts(); pfPopulateDatalists(); }
+}
+
+// Feeds the Category and Form fields' <datalist> so staff can pick something already in use
+// (fast, consistent spelling) or just type a brand-new value if nothing fits -- best of both.
+function pfPopulateDatalists(){
+  const cats = Array.from(new Set(allProducts.map(p => p.cat).filter(Boolean))).sort();
+  const forms = Array.from(new Set(allProducts.map(p => p.form).filter(Boolean))).sort();
+  document.getElementById('pf-catList').innerHTML = cats.map(c => `<option value="${escapeAttr(c)}">`).join('');
+  document.getElementById('pf-formList').innerHTML = forms.map(f => `<option value="${escapeAttr(f)}">`).join('');
+}
+
+// Product movement classification (Fast / Normal / Slow) -- pure client-side computation over
+// the same `allOrders` data the Orders tab already loads (see the products-tab click handler,
+// which lazily triggers loadOrders() if it hasn't run yet, so this map has data to work with).
+//
+// Rules:
+//   Slow moving   -- no order in the last SLOW_MOVER_DAYS (60d), or never ordered at all.
+//   Fast moving   -- ordered within the last FAST_MOVER_RECENT_DAYS (30d) AND its qty sold in
+//                    the last FAST_MOVER_WINDOW_DAYS (90d) is in the top ~30% of all products
+//                    that sold anything in that window (recency + volume together, so a single
+//                    old bulk order doesn't count as "fast", and a trickle of tiny orders doesn't
+//                    either).
+//   Normal        -- everything else in between.
+const SLOW_MOVER_DAYS = 60;
+const FAST_MOVER_RECENT_DAYS = 30;
+const FAST_MOVER_WINDOW_DAYS = 90;
+const FAST_MOVER_TOP_SHARE = 0.3; // top 30% by quantity counts as "fast" on the volume side
+
+function computeMovementStats(){
+  const now = Date.now();
+  const windowCutoff = now - FAST_MOVER_WINDOW_DAYS * 86400000;
+  const lastOrderedMap = {}; // sku -> Date of most recent order, ever
+  const qtyWindowMap = {};   // sku -> qty sold within FAST_MOVER_WINDOW_DAYS
+  allOrders.forEach(o => {
+    const d = new Date(o.createdAt);
+    if(isNaN(d)) return;
+    (o.items || []).forEach(it => {
+      const key = it.sku;
+      if(!key) return;
+      if(!lastOrderedMap[key] || d > lastOrderedMap[key]) lastOrderedMap[key] = d;
+      if(d.getTime() >= windowCutoff){ qtyWindowMap[key] = (qtyWindowMap[key] || 0) + (Number(it.qty) || 0); }
+    });
+  });
+  const qtyValues = Object.values(qtyWindowMap).sort((a, b) => b - a);
+  let fastQtyThreshold = Infinity;
+  if(qtyValues.length){
+    const topCount = Math.max(1, Math.ceil(qtyValues.length * FAST_MOVER_TOP_SHARE));
+    fastQtyThreshold = qtyValues[topCount - 1];
+  }
+  return { lastOrderedMap, qtyWindowMap, fastQtyThreshold };
+}
+
+function productMovementInfo(sku, stats){
+  if(allOrders.length === 0) return null; // order data not loaded yet -- don't guess
+  const s = stats || computeMovementStats();
+  const last = sku ? s.lastOrderedMap[sku] : undefined;
+  if(!last){
+    return { tier: 'slow', label: 'Never ordered', badge: '🐌 Never ordered' };
+  }
+  const daysSince = Math.floor((Date.now() - last.getTime()) / 86400000);
+  if(daysSince >= SLOW_MOVER_DAYS){
+    return { tier: 'slow', label: `No orders in ${daysSince}d`, badge: `🐌 No orders in ${daysSince}d` };
+  }
+  const qtyWindow = sku ? (s.qtyWindowMap[sku] || 0) : 0;
+  if(daysSince <= FAST_MOVER_RECENT_DAYS && qtyWindow >= s.fastQtyThreshold){
+    return { tier: 'fast', label: 'Fast moving', badge: '🔥 Fast moving' };
+  }
+  return { tier: 'normal', label: 'Normal', badge: '🟢 Normal' };
+}
+
+const MOVEMENT_BADGE_STYLE = {
+  fast: 'background:rgba(34,197,94,0.18);color:#22c55e;border:1px solid rgba(34,197,94,0.4);',
+  normal: 'background:rgba(148,163,184,0.18);color:#94a3b8;border:1px solid rgba(148,163,184,0.4);',
+  slow: 'background:rgba(245,158,11,0.18);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);',
+};
+
+function renderProducts(){
+  const q = document.getElementById('productSearchInput').value.trim().toUpperCase();
+  const divF = document.getElementById('productDivFilter').value;
+  const slowOnly = document.getElementById('productSlowMoverFilter').checked;
+  const stats = allOrders.length ? computeMovementStats() : null;
+  let rows = allProducts.filter(p => {
+    if(divF && p.div !== divF) return false;
+    if(q && !(`${p.sku} ${p.name} ${p.comp||''}`).toUpperCase().includes(q)) return false;
+    if(slowOnly){
+      const info = stats ? productMovementInfo(p.sku, stats) : null;
+      if(!info || info.tier !== 'slow') return false;
+    }
+    return true;
+  });
+  const list = document.getElementById('productsList');
+  if(rows.length === 0){
+    list.innerHTML = `<div class="empty-msg">No products match this filter.${allOrders.length === 0 ? ' (Order history is still loading, so movement badges may not show yet.)' : ''}</div>`;
+    return;
+  }
+  list.innerHTML = rows.map(p => {
+    const info = stats ? productMovementInfo(p.sku, stats) : null;
+    const badge = info
+      ? `<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;${MOVEMENT_BADGE_STYLE[info.tier]}">${info.badge}</span>`
+      : '';
+    return `<div class="row-card ${p.active ? '' : 'inactive'}">
+    <div class="row-top">
+      <div>
+        <div class="row-title">${escapeHtml(p.sku)} — ${escapeHtml(p.name)} ${p.active ? '' : '<span style="font-size:11px;color:var(--text-muted);">(hidden)</span>'}${badge}</div>
+        <div class="row-meta">${escapeHtml(DIV_LABEL[p.div] || p.div)} · ${escapeHtml(p.form || '—')} · ${escapeHtml(p.pack || '—')}</div>
+      </div>
+    </div>
+    <div class="row-actions">
+      <button type="button" data-act="edit-product" data-id="${p.id}">Edit</button>
+      ${p.active
+        ? `<button type="button" class="danger" data-act="hide-product" data-id="${p.id}">Hide from app</button>`
+        : `<button type="button" class="activate" data-act="show-product" data-id="${p.id}">Show in app</button>`}
+      <button type="button" class="danger" data-act="delete-product" data-id="${p.id}" data-name="${escapeAttr(p.name)}">Delete</button>
+    </div>
+  </div>`;
+  }).join('');
+}
+
+document.getElementById('productSearchInput').addEventListener('input', renderProducts);
+document.getElementById('productDivFilter').addEventListener('change', renderProducts);
+document.getElementById('productSlowMoverFilter').addEventListener('change', renderProducts);
+document.getElementById('exportProductsBtn').addEventListener('click', () => {
+  const stats = allOrders.length ? computeMovementStats() : null;
+  const rows = allProducts.map(p => {
+    const info = stats ? productMovementInfo(p.sku, stats) : null;
+    return {
+      'SKU': p.sku, 'Name': p.name, 'Division': DIV_LABEL[p.div] || p.div, 'Form': p.form || '',
+      'Category': p.cat || '', 'Pack': p.pack || '', 'Composition': p.comp || '',
+      'Image': p.img || '', 'Label PDF': p.pdf || '', 'Visible in app': p.active ? 'Yes' : 'No',
+      'Movement': info ? info.label : '',
+    };
+  });
+  exportExcel('remedial-products', 'Products', rows);
+});
+
+function openProductForm(product){
+  document.getElementById('productForm').classList.add('open');
+  document.getElementById('productFormTitle').textContent = product ? 'Edit Product' : 'Add Product';
+  document.getElementById('pf-id').value = product ? product.id : '';
+  document.getElementById('pf-sku').value = product ? product.sku : '';
+  document.getElementById('pf-sku').disabled = !!product; // SKU is the stable identifier -- don't let it change after creation
+  document.getElementById('pf-name').value = product ? product.name : '';
+  document.getElementById('pf-div').value = product ? product.div : 'General';
+  document.getElementById('pf-form').value = product ? (product.form || '') : '';
+  document.getElementById('pf-cat').value = product ? (product.cat || '') : '';
+  document.getElementById('pf-pack').value = product ? (product.pack || '') : '';
+  document.getElementById('pf-img').value = product ? (product.img || '') : '';
+  document.getElementById('pf-pdf').value = product ? (product.pdf || '') : '';
+  document.getElementById('pf-comp').value = product ? (product.comp || '') : '';
+  let flav = [];
+  if(product && product.flavours_json){ try{ flav = JSON.parse(product.flavours_json); }catch(e){} }
+  document.getElementById('pf-flavours').value = flav.join(', ');
+
+  // Reset the upload widgets each time the form opens -- the file inputs can't be pre-filled
+  // (browsers won't let JS set a file input's value), so clear them and just show a preview
+  // of whatever image path is already saved, if any.
+  document.getElementById('pf-imgFile').value = '';
+  document.getElementById('pf-pdfFile').value = '';
+  document.getElementById('pf-imgUploadMsg').textContent = '';
+  document.getElementById('pf-pdfUploadMsg').textContent = '';
+  pfUpdateImgPreview();
+}
+function closeProductForm(){
+  document.getElementById('productForm').classList.remove('open');
+  document.getElementById('pf-sku').disabled = false;
+}
+
+function pfUpdateImgPreview(){
+  const val = document.getElementById('pf-img').value.trim();
+  const wrap = document.getElementById('pf-imgPreviewWrap');
+  const img = document.getElementById('pf-imgPreview');
+  if(val){
+    img.src = val.startsWith('http') || val.startsWith('/') ? val : '/' + val;
+    wrap.style.display = 'block';
+  }else{
+    wrap.style.display = 'none';
+    img.src = '';
+  }
+}
+document.getElementById('pf-img').addEventListener('input', pfUpdateImgPreview);
+
+// Reads a File object as a base64 data URL and returns just the base64 payload (stripping
+// the "data:<type>;base64," prefix the browser adds), since that's all the upload endpoint
+// needs -- it already knows the content-type separately.
+function readFileAsBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function pfUploadFile(file, targetInputId, msgElId, kindLabel){
+  const msgEl = document.getElementById(msgElId);
+  if(file.size > 1000000){
+    msgEl.style.color = '#f87171';
+    msgEl.textContent = `File too large (${(file.size/1024/1024).toFixed(1)}MB) — please compress this ${kindLabel} to under 1MB and try again.`;
+    return;
+  }
+  msgEl.style.color = 'var(--text-muted)';
+  msgEl.textContent = 'Uploading...';
+  try{
+    const dataBase64 = await readFileAsBase64(file);
+    const res = await adminApi('uploadAsset', { filename: file.name, contentType: file.type, dataBase64 });
+    if(res && res.ok && res.url){
+      document.getElementById(targetInputId).value = res.url;
+      if(targetInputId === 'pf-img') pfUpdateImgPreview();
+      msgEl.style.color = '#4ade80';
+      msgEl.textContent = `✅ Uploaded — ${kindLabel} saved.`;
+    }else{
+      msgEl.style.color = '#f87171';
+      msgEl.textContent = res && res.error ? res.error : 'Upload failed — please try again.';
+    }
+  }catch(e){
+    msgEl.style.color = '#f87171';
+    msgEl.textContent = 'Upload failed — please try again.';
+  }
+}
+
+document.getElementById('pf-imgFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) pfUploadFile(file, 'pf-img', 'pf-imgUploadMsg', 'photo');
+});
+document.getElementById('pf-pdfFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) pfUploadFile(file, 'pf-pdf', 'pf-pdfUploadMsg', 'label PDF');
+});
+
+// "Auto" SKU button: looks at SKUs already used in the selected division, finds the most
+// common letter-prefix (e.g. "R" for Remedial, "H" for She Biologicals -- FemiGenix actually
+// has two active prefixes, G and V, so this picks whichever has more products already and
+// keeps using it), and suggests the next number in that sequence, padded to match the
+// existing width. A brand-new division with zero products falls back to a sensible default
+// per division so the button always produces something usable.
+const PF_DEFAULT_PREFIX = { General: 'R', Skincare: 'S', Gynae: 'H', Ortho: 'O', FemiGenix: 'G' };
+document.getElementById('pf-skuAutoBtn').addEventListener('click', () => {
+  const div = document.getElementById('pf-div').value;
+  const skusInDiv = allProducts.filter(p => p.div === div).map(p => p.sku).filter(Boolean);
+  const byPrefix = {};
+  skusInDiv.forEach(sku => {
+    const m = /^([A-Za-z]+)(\d+)$/.exec(sku.trim());
+    if(!m) return;
+    const prefix = m[1].toUpperCase();
+    const num = parseInt(m[2], 10);
+    const width = m[2].length;
+    if(!byPrefix[prefix]) byPrefix[prefix] = { count: 0, max: 0, width };
+    byPrefix[prefix].count++;
+    if(num > byPrefix[prefix].max) byPrefix[prefix].max = num;
+    if(m[2].length > byPrefix[prefix].width) byPrefix[prefix].width = m[2].length;
+  });
+  let bestPrefix = null, best = null;
+  Object.keys(byPrefix).forEach(p => {
+    if(!best || byPrefix[p].count > best.count){ best = byPrefix[p]; bestPrefix = p; }
+  });
+  if(!bestPrefix){ bestPrefix = PF_DEFAULT_PREFIX[div] || 'X'; best = { max: 0, width: 3 }; }
+  const nextNum = String(best.max + 1).padStart(best.width, '0');
+  document.getElementById('pf-sku').value = bestPrefix + nextNum;
+});
+
+document.getElementById('addProductBtn').addEventListener('click', () => openProductForm(null));
+document.getElementById('productCancelBtn').addEventListener('click', closeProductForm);
+
+document.getElementById('productSaveBtn').addEventListener('click', async () => {
+  const id = document.getElementById('pf-id').value;
+  const flavRaw = document.getElementById('pf-flavours').value.trim();
+  const product = {
+    sku: document.getElementById('pf-sku').value.trim(),
+    name: document.getElementById('pf-name').value.trim(),
+    div: document.getElementById('pf-div').value,
+    form: document.getElementById('pf-form').value.trim(),
+    cat: document.getElementById('pf-cat').value.trim(),
+    pack: document.getElementById('pf-pack').value.trim(),
+    img: document.getElementById('pf-img').value.trim(),
+    pdf: document.getElementById('pf-pdf').value.trim(),
+    comp: document.getElementById('pf-comp').value.trim(),
+    flavours: flavRaw ? flavRaw.split(',').map(s => s.trim()).filter(Boolean) : [],
+  };
+  if(!product.sku || !product.name){ alert('SKU and Name are required.'); return; }
+  let res;
+  if(id){ res = await adminApi('updateProduct', { productId: id, product }); }
+  else{ res = await adminApi('addProduct', { product }); }
+  if(res && res.error){ alert(res.error); return; }
+  closeProductForm();
+  loadProducts();
+});
+
+document.getElementById('productsList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.getAttribute('data-act');
+  const id = btn.getAttribute('data-id');
+  if(act === 'edit-product'){
+    openProductForm(allProducts.find(p => String(p.id) === id));
+  }else if(act === 'hide-product' || act === 'show-product'){
+    await adminApi('toggleProductActive', { productId: id, active: act === 'show-product' });
+    loadProducts();
+  }else if(act === 'delete-product'){
+    const name = btn.getAttribute('data-name');
+    if(!confirm(`Permanently delete "${name}"? This removes it from the app entirely -- consider "Hide from app" instead if you might bring it back.`)) return;
+    await adminApi('deleteProduct', { productId: id });
+    loadProducts();
+  }
+});
+
+// ---------- Schemes ----------
+let allSchemes = [];
+let currentTiers = [];
+
+async function loadSchemes(){
+  const res = await adminApi('listSchemes').catch(() => null);
+  if(res && res.ok){ allSchemes = res.schemes; renderSchemes(); }
+}
+
+function renderSchemes(){
+  const list = document.getElementById('schemesList');
+  if(allSchemes.length === 0){ list.innerHTML = '<div class="empty-msg">No schemes yet.</div>'; return; }
+  list.innerHTML = allSchemes.map(s => {
+    let tiers = [];
+    try{ tiers = JSON.parse(s.tiers_json); }catch(e){}
+    const tiersTxt = tiers.map(t => `Buy ${t.buy} get ${t.free} free`).join(' · ');
+    return `<div class="row-card ${s.active ? '' : 'inactive'}">
+      <div class="row-top">
+        <div>
+          <div class="row-title">${escapeHtml(s.title)} ${s.active ? '' : '<span style="font-size:11px;color:var(--text-muted);">(hidden)</span>'}</div>
+          <div class="row-meta">${escapeHtml(DIV_LABEL[s.div] || s.div)} · SKU ${escapeHtml(s.sku)} · ${escapeHtml(tiersTxt)}</div>
+        </div>
+      </div>
+      <div class="row-actions">
+        <button type="button" data-act="edit-scheme" data-id="${s.id}">Edit</button>
+        ${s.active
+          ? `<button type="button" class="danger" data-act="hide-scheme" data-id="${s.id}">Hide from app</button>`
+          : `<button type="button" class="activate" data-act="show-scheme" data-id="${s.id}">Show in app</button>`}
+        <button type="button" class="danger" data-act="delete-scheme" data-id="${s.id}" data-name="${escapeAttr(s.title)}">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTierRows(){
+  document.getElementById('sf-tiers').innerHTML = currentTiers.map((t, i) => `
+    <div class="tier-row">
+      Buy <input type="number" min="1" class="tier-buy" data-i="${i}" value="${t.buy}">
+      get <input type="number" min="1" class="tier-free" data-i="${i}" value="${t.free}"> free
+      <button type="button" class="small-btn" data-act="remove-tier" data-i="${i}">✕</button>
+    </div>`).join('');
+}
+
+document.getElementById('sf-tiers').addEventListener('input', (e) => {
+  const i = parseInt(e.target.getAttribute('data-i'), 10);
+  if(Number.isNaN(i)) return;
+  if(e.target.classList.contains('tier-buy')) currentTiers[i].buy = parseInt(e.target.value, 10) || 0;
+  if(e.target.classList.contains('tier-free')) currentTiers[i].free = parseInt(e.target.value, 10) || 0;
+});
+document.getElementById('sf-tiers').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-act="remove-tier"]');
+  if(!btn) return;
+  currentTiers.splice(parseInt(btn.getAttribute('data-i'), 10), 1);
+  renderTierRows();
+});
+document.getElementById('sf-addTier').addEventListener('click', () => {
+  currentTiers.push({ buy: 1, free: 1 });
+  renderTierRows();
+});
+
+function openSchemeForm(scheme){
+  document.getElementById('schemeForm').classList.add('open');
+  document.getElementById('schemeFormTitle').textContent = scheme ? 'Edit Scheme' : 'Add Scheme';
+  document.getElementById('sf-id').value = scheme ? scheme.id : '';
+  document.getElementById('sf-div').value = scheme ? scheme.div : 'General';
+  document.getElementById('sf-sku').value = scheme ? scheme.sku : '';
+  document.getElementById('sf-title').value = scheme ? scheme.title : '';
+  currentTiers = [];
+  if(scheme && scheme.tiers_json){ try{ currentTiers = JSON.parse(scheme.tiers_json); }catch(e){} }
+  if(currentTiers.length === 0) currentTiers = [{ buy: 1, free: 1 }];
+  renderTierRows();
+}
+function closeSchemeForm(){ document.getElementById('schemeForm').classList.remove('open'); }
+
+document.getElementById('exportSchemesBtn').addEventListener('click', () => {
+  const rows = allSchemes.map(s => {
+    let tiers = [];
+    try{ tiers = JSON.parse(s.tiers_json); }catch(e){}
+    return {
+      'Title': s.title, 'Division': DIV_LABEL[s.div] || s.div, 'SKU': s.sku,
+      'Tiers': tiers.map(t => `Buy ${t.buy} get ${t.free} free`).join(' | '),
+      'Visible in app': s.active ? 'Yes' : 'No',
+    };
+  });
+  exportExcel('remedial-schemes', 'Schemes', rows);
+});
+
+document.getElementById('addSchemeBtn').addEventListener('click', () => openSchemeForm(null));
+document.getElementById('schemeCancelBtn').addEventListener('click', closeSchemeForm);
+
+document.getElementById('schemeSaveBtn').addEventListener('click', async () => {
+  const id = document.getElementById('sf-id').value;
+  const scheme = {
+    div: document.getElementById('sf-div').value,
+    sku: document.getElementById('sf-sku').value.trim(),
+    title: document.getElementById('sf-title').value.trim(),
+    tiers: currentTiers.filter(t => t.buy > 0 && t.free > 0),
+  };
+  if(!scheme.sku || !scheme.title || scheme.tiers.length === 0){ alert('SKU, title, and at least one valid tier are required.'); return; }
+  let res;
+  if(id){ res = await adminApi('updateScheme', { schemeId: id, scheme }); }
+  else{ res = await adminApi('addScheme', { scheme }); }
+  if(res && res.error){ alert(res.error); return; }
+  closeSchemeForm();
+  loadSchemes();
+});
+
+document.getElementById('schemesList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if(!btn) return;
+  const act = btn.getAttribute('data-act');
+  const id = btn.getAttribute('data-id');
+  if(act === 'edit-scheme'){
+    openSchemeForm(allSchemes.find(s => String(s.id) === id));
+  }else if(act === 'hide-scheme' || act === 'show-scheme'){
+    await adminApi('toggleSchemeActive', { schemeId: id, active: act === 'show-scheme' });
+    loadSchemes();
+  }else if(act === 'delete-scheme'){
+    const name = btn.getAttribute('data-name');
+    if(!confirm(`Permanently delete scheme "${name}"?`)) return;
+    await adminApi('deleteScheme', { schemeId: id });
+    loadSchemes();
+  }
+});
+
+// Auto-resume if this tab already logged in this session.
+(function init(){
+  if(sessionGetAdminPw()){
+    showDashboard();
+  }else{
+    showLogin('');
+  }
+})();
+</script>
+</body>
+</html>
